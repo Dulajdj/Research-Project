@@ -1,0 +1,20 @@
+# Node
+node_modules/
+npm-debug.log*
+
+# Next.js
+.next/
+out/
+
+# Env
+.env
+.env.local
+
+# OS
+.DS_Store
+
+.env
+node_modules/
+venv/
+__pycache__/
+.DS_Store
