@@ -197,6 +197,45 @@ git clone - https://github.com/Dulajdj/Research-Project.git
 
 ---
 
+🔹 2. Backend Setup
+
+> The backend listens on the port specified by `PORT` environment variable (defaults to
+> `5000`). You can change it when you start the server or put it in a `.env` file.
+>
+> Example `backend/.env`:
+>
+> ```env
+> PORT=5000
+> MONGO_URI=mongodb://localhost:27017/yourdb
+> # any other secrets you need
+> ```
+>
+> Start the backend from the `backend` folder:
+>
+> ```bash
+> cd backend
+> npm install          # (already done)
+> npm run dev          # starts nodemon on port 5000
+> # or: PORT=3001 npm run dev  # run on 3001 instead
+> ```
+>
+> Once the backend is running, you can launch the frontend.
+
+🔹 2. Frontend Setup
+
+> **Important:** the frontend talks to the backend via `NEXT_PUBLIC_API_URL`. During local
+> development you can point it at `http://localhost:5000` (or whatever port the backend is
+> running on).
+>
+> Create a file in `frontend/.env.local` with the following content:
+>
+> ```env
+> NEXT_PUBLIC_API_URL=http://localhost:5000
+> ```
+>
+> The `|| 'http://localhost:5000'` fallback is already wired into the code so the site will
+> work even if you forget to set the variable, but it's good practice to define it explicitly.
+
 🔹 2. Frontend Setup
 
 cd ai-career-guidance-system
