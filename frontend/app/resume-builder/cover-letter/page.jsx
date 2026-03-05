@@ -1,6 +1,7 @@
-// app/resume-builder/cover-letter/saved/page.jsx
+// app/resume-builder/cover-letter/page.jsx
+// (root of cover-letter section)
 import CoverLetterList from "../../../components/ui/CoverLetterList";
-import { getCoverLetters } from "../../../../actions/cover-letter";
+import { getCoverLetters } from "../../../actions/cover-letter";
 
 export default async function SavedCoverLetters() {
   const { coverLetters } = await getCoverLetters();

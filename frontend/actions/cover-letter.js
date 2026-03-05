@@ -2,7 +2,8 @@
 // Helper functions used by server components and client components on the
 // frontend. They proxy requests to the backend Express API.
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
+// backend base URL; override with NEXT_PUBLIC_API_URL when available
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 async function fetchJSON(path, options = {}) {
   const res = await fetch(`${API_BASE}${path}`, options);

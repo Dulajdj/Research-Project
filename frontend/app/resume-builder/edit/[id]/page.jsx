@@ -8,7 +8,8 @@ import { toast, Toaster } from 'react-hot-toast';
 import html2canvas from 'html2canvas-pro';  
 import { jsPDF } from 'jspdf';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || ''; // backend base URL
+// backend base URL; override with NEXT_PUBLIC_API_URL in production
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'; // backend base URL
 
 export default function ResumeBuilderEdit() {
   const params = useParams();

@@ -156,7 +156,8 @@ app.delete('/api/cover-letter', async (req, res) => {
   }
 });
 
-const PORT = 5000;
+// read port from environment so we can run on 3001 when needed
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 5000;
 
 // connect database before starting server
 connectDB()
