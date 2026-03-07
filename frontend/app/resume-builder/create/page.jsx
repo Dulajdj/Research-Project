@@ -820,15 +820,12 @@ const saveResume = async () => {
         toast.error('Saved resume did NOT contain a photo', { duration: 5000 });
       }
 
-      // Store the saved resume in sessionStorage as a short-lived cache so the Edit page can display it immediately
+      // Store the saved resume in sessionStorage as a short-lived cache so the Edit page can display it immediately if the user chooses to edit.
       try {
         sessionStorage.setItem('recentlySavedResume', JSON.stringify(saved));
       } catch (e) {
         console.warn('Failed to write recentlySavedResume to sessionStorage', e);
       }
-
-      // Navigate to edit page to ensure it performs a fresh fetch and displays the saved photo
-      router.push(`/resume-builder/edit/${saved._id}`);
 
     } else {
       throw new Error();
