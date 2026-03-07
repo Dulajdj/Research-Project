@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Loader2, Sparkles, User, Building, ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { generateCoverLetter } from "../../../../actions/cover-letter";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 export default function CoverLetterCreatePage() {
   const router = useRouter();
@@ -80,6 +82,16 @@ export default function CoverLetterCreatePage() {
           <p className="text-gray-300 text-lg">
             Fill in the details below and let AI write the perfect letter for you.
           </p>
+        </div>
+                {/* --- Back Button Area  --- */}
+        <div className="flex justify-start mb-8">
+            <Link 
+                href="/resume-builder" 
+                className="flex items-center gap-2 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition-all"
+            >
+                <ArrowLeft size={20} /> 
+                Back to Dashboard
+            </Link>
         </div>
 
         {/* Glassmorphism Form Container */}

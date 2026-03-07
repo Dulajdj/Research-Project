@@ -92,7 +92,6 @@ const handlePreviewPhotoUpload = (e) => {
     experience: [],
     education: [],
     projects: [],
-    certifications: [],
     references: []
   });
 
@@ -158,7 +157,6 @@ useEffect(() => {
           experience: Array.isArray(parsed.experience) ? parsed.experience : [],
           education: Array.isArray(parsed.education) ? parsed.education : [],
           projects: Array.isArray(parsed.projects) ? parsed.projects : [],
-          certifications: Array.isArray(parsed.certifications) ? parsed.certifications : [],
           references: Array.isArray(parsed.references) ? parsed.references : [],
           selectedTemplate: parsed.selectedTemplate || 'modern'
         });
@@ -194,7 +192,7 @@ useEffect(() => {
       }
 
       const data = await res.json();
-      console.log('Loaded data:', data); // ← මේක දාලා බලන්න console එකේ
+      console.log('Loaded data:', data); 
 
       try {
         if (data.personalInfo?.photo) {
@@ -221,7 +219,6 @@ useEffect(() => {
         experience: Array.isArray(data.experience) ? data.experience : [],
         education: Array.isArray(data.education) ? data.education : [],
         projects: Array.isArray(data.projects) ? data.projects : [],
-        certifications: Array.isArray(data.certifications) ? data.certifications : [],
         references: Array.isArray(data.references) ? data.references : []
       });
 
@@ -242,7 +239,7 @@ useEffect(() => {
 
 const fetchGithubProjects = async () => {
   if (!githubUsername.trim()) {
-    toast.error('GitHub username එක දාන්න!');
+    toast.error('Please Enter GitHub username ');
     return;
   }
 
@@ -271,12 +268,13 @@ const fetchGithubProjects = async () => {
         projects: [...prev.projects, ...newProjects]
       }));
 
-      toast.success(`${newProjects.length} projects GitHub එකෙන් ගත්තා!`);
+      toast.success(`${newProjects.length} Get Project from Github`);
       setShowGithubImport(false);
       setGithubUsername('');
     })
     .catch(err => {
-      toast.error(err.message || 'GitHub fetch කරන්න බැරිවුණා');
+      toast.error(err.message || 'cannot GitHub fetch');
+
     })
     .finally(() => {
       setIsFetchingGithub(false);
@@ -303,7 +301,6 @@ const handleUploadResume = (e) => {
         experience: Array.isArray(json.experience) ? json.experience : prev.experience,
         education: Array.isArray(json.education) ? json.education : prev.education,
         projects: Array.isArray(json.projects) ? json.projects : prev.projects,
-        certifications: Array.isArray(json.certifications) ? json.certifications : prev.certifications,
         references: Array.isArray(json.references) ? json.references : prev.references
       }));
 
@@ -339,7 +336,6 @@ const handleUploadResume = (e) => {
           experience: formData.experience,
           education: formData.education,
           projects: formData.projects,
-          certifications: formData.certifications,
           references: formData.references,           // Save References
           selectedTemplate
         })
@@ -598,7 +594,7 @@ const generateProfessionalCV = () => {
     ));
   };
 
-  // ============= MODERN TEMPLATE - Create page එකේ 100% SAME =============
+  // ============= MODERN TEMPLATE - Create page 100% SAME =============
   if (selectedTemplate === 'modern') {
     return (
       <div className="cv-template cv-modern bg-white" style={{ padding: '20mm', fontFamily: 'Arial, sans-serif' }}>
@@ -1065,7 +1061,7 @@ const generateProfessionalCV = () => {
 
           {/* FORM TAB - FULLY FIXED */}
           {activeTab === 'form' && (
-            <div className="grid lg:grid-cols-2 gap-10 max-w-7xl mx-auto">
+            <div className="max-w-5xl mx-auto space-y-10">
               <div className="space-y-10">
 
                 {/* Personal Information */}
@@ -1162,19 +1158,25 @@ const generateProfessionalCV = () => {
                   />
                 </div>
 
-                {/* Experience, Education, Projects, Certifications */}
-                {['experience', 'education', 'projects'].map((section) => (
+                {/* Experience, Education, Projects, References */}
+{['experience', 'education', 'projects', 'references'].map((section) => (
                   <div key={section} className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-3xl p-6">
                     <div className="flex justify-between items-center mb-8">
                       <h3 className="text-2xl font-bold text-white capitalize">
-                        {section === 'experience' ? 'Work Experience' : section === 'education' ? 'Education' : 'Projects'}
+                        {section === 'experience' ? 'Work Experience'
+                          : section === 'education' ? 'Education'
+                          : section === 'projects' ? 'Projects'
+                          : 'References'}
                       </h3>
                       <div className="flex gap-4">
                         <button
                           onClick={() => { setCurrentEntry({ ...currentEntry, type: section }); setShowEntryForm(true); }}
                           className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-2xl flex items-center gap-2 hover:shadow-xl transition"
                         >
-                          Add {section === 'projects' ? 'Project' : section === 'education' ? 'Degree' : 'Job'}
+                          Add {section === 'projects' ? 'Project'
+                            : section === 'education' ? 'Degree'
+                            : section === 'experience' ? 'Job'
+                            : 'Reference'}
                         </button>
                         {section === 'projects' && (
                           <button
@@ -1198,9 +1200,11 @@ const generateProfessionalCV = () => {
                       <div>
       <h4 className="text-xl font-bold text-white">{item.title}</h4>
       <p className="text-purple-300 mt-1">{item.company}</p>
-      <p className="text-sm text-gray-400 mt-1">
-        {item.startDate} – {item.current ? 'Present' : item.endDate}
-      </p>
+      {section !== 'references' && (
+        <p className="text-sm text-gray-400 mt-1">
+          {item.startDate} – {item.current ? 'Present' : item.endDate}
+        </p>
+      )}
       {item.url && (
         <a
           href={item.url}
@@ -1249,45 +1253,8 @@ const generateProfessionalCV = () => {
 
                 
               </div>
-              
-
-{/* AI Assistant */}
-              <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-3xl p-6">
-                <h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-                  <Sparkles className="w-5 h-5" />
-                  AI Assistant
-                </h3>
-                <div className="space-y-4">
-                  <button
-                    onClick={generateResume}
-                    disabled={isGenerating}
-                    className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-2xl hover:shadow-lg transition disabled:opacity-50"
-                  >
-                    {isGenerating ? (
-                      <>
-                        <Loader2 className="w-4 h-4 inline mr-2 animate-spin" />
-                        Generating...
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="w-4 h-4 inline mr-2" />
-                        Generate with AI
-                      </>
-                    )}
-                  </button>
-                  <div className="text-sm text-gray-400">
-                    AI can help you:
-                    <ul className="list-disc list-inside mt-2 space-y-1">
-                      <li>Optimize your summary</li>
-                      <li>Suggest better skills</li>
-                      <li>Improve descriptions</li>
-                      <li>ATS optimization</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-  </div>
-)}
+            </div>
+          )}
 {activeTab === 'preview' && (
   <div className="max-w-4xl mx-auto my-10">
     {/* Preview Toolbar: Upload / Edit / Save / Download */}
@@ -1352,7 +1319,7 @@ const generateProfessionalCV = () => {
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-2xl font-bold text-white">
                   {currentEntry.index !== undefined ? "Edit " : "Add "}
-                  Add {currentEntry.type.charAt(0).toUpperCase() + currentEntry.type.slice(1, -1)}
+                  {currentEntry.type === 'projects' ? 'Project' : currentEntry.type === 'education' ? 'Degree' : currentEntry.type === 'experience' ? 'Job' : 'Reference'}
                 </h3>
                 <button onClick={() => setShowEntryForm(false)} className="text-gray-400 hover:text-white">
                   <X className="w-6 h-6" />
@@ -1360,30 +1327,16 @@ const generateProfessionalCV = () => {
               </div>
 
               <div className="space-y-5">
-                <input type="text" placeholder="Title / Degree" value={currentEntry.title}
+                <input type="text" placeholder="Full Name" value={currentEntry.title}
                   onChange={(e) => setCurrentEntry({ ...currentEntry, title: e.target.value })}
                   className="w-full bg-slate-800/60 border border-white/10 rounded-2xl px-5 py-4 text-white" />
-                <input type="text" placeholder="Company / University" value={currentEntry.company}
+                <input type="text" placeholder="Position & Company" value={currentEntry.company}
                   onChange={(e) => setCurrentEntry({ ...currentEntry, company: e.target.value })}
                   className="w-full bg-slate-800/60 border border-white/10 rounded-2xl px-5 py-4 text-white" />
                 <input type="text" placeholder="Location" value={currentEntry.location}
                   onChange={(e) => setCurrentEntry({ ...currentEntry, location: e.target.value })}
                   className="w-full bg-slate-800/60 border border-white/10 rounded-2xl px-5 py-4 text-white" />
-                <div className="flex gap-4">
-                  <input type="month" value={currentEntry.startDate}
-                    onChange={(e) => setCurrentEntry({ ...currentEntry, startDate: e.target.value })}
-                    className="flex-1 bg-slate-800/60 border border-white/10 rounded-2xl px-5 py-4 text-white" />
-                  <input type="month" value={currentEntry.endDate} disabled={currentEntry.current}
-                    onChange={(e) => setCurrentEntry({ ...currentEntry, endDate: e.target.value })}
-                    className="flex-1 bg-slate-800/60 border border-white/10 rounded-2xl px-5 py-4 text-white disabled:opacity-50" />
-                </div>
-                <label className="flex items-center gap-3 text-white">
-                  <input type="checkbox" checked={currentEntry.current}
-                    onChange={(e) => setCurrentEntry({ ...currentEntry, current: e.target.checked, endDate: '' })}
-                    className="w-5 h-5 accent-purple-500" />
-                  Currently working/studying here
-                </label>
-                <textarea placeholder="Description" value={currentEntry.description}
+                <textarea placeholder="Contact Information (Phone, Email, etc.)" value={currentEntry.description}
                   onChange={(e) => setCurrentEntry({ ...currentEntry, description: e.target.value })}
                   className="w-full bg-slate-800/60 border border-white/10 rounded-2xl px-5 py-4 text-white h-32 resize-none" />
               </div>
