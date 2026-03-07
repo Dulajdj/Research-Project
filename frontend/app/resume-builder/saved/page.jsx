@@ -44,8 +44,7 @@ export default function SavedResumes() {
           skills: item.skills || '',
           experience: Array.isArray(item.experience) ? item.experience : [],
           education: Array.isArray(item.education) ? item.education : [],
-          projects: Array.isArray(item.projects) ? item.projects : [],
-          certifications: Array.isArray(item.certifications) ? item.certifications : []
+          projects: Array.isArray(item.projects) ? item.projects : []
         }
       }));
 
