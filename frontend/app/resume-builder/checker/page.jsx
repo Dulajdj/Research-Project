@@ -380,7 +380,7 @@ const analyzeResume = async () => {
                   className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-4 rounded-2xl hover:shadow-lg transition text-center"
                 >
                   <Eye className="w-5 h-5 inline mr-2" />
-                  Edit with AI Builder
+                  Create New Resume 
                 </Link>
               </div>
             </div>
