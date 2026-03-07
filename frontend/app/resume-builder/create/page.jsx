@@ -757,7 +757,7 @@ const generateAiSummary = async () => {
       setFormData(prev => ({ ...prev, summary: data.summary }));
       toast.success('Summary generated!');
     } else {
-      // Router error එකක් ආවොත් පරිශීලකයාට පණිවිඩයක් පෙන්වන්න
+    
       if (data.error && data.error.includes('router')) {
         toast.error('AI is warming up. Please click again in 10 seconds.');
       } else {

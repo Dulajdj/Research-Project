@@ -192,7 +192,7 @@ useEffect(() => {
       }
 
       const data = await res.json();
-      console.log('Loaded data:', data); // ← මේක දාලා බලන්න console එකේ
+      console.log('Loaded data:', data); 
 
       try {
         if (data.personalInfo?.photo) {
@@ -239,7 +239,7 @@ useEffect(() => {
 
 const fetchGithubProjects = async () => {
   if (!githubUsername.trim()) {
-    toast.error('GitHub username එක දාන්න!');
+    toast.error('Please Enter GitHub username ');
     return;
   }
 
@@ -268,12 +268,13 @@ const fetchGithubProjects = async () => {
         projects: [...prev.projects, ...newProjects]
       }));
 
-      toast.success(`${newProjects.length} projects GitHub එකෙන් ගත්තා!`);
+      toast.success(`${newProjects.length} Get Project from Github`);
       setShowGithubImport(false);
       setGithubUsername('');
     })
     .catch(err => {
-      toast.error(err.message || 'GitHub fetch කරන්න බැරිවුණා');
+      toast.error(err.message || 'cannot GitHub fetch');
+
     })
     .finally(() => {
       setIsFetchingGithub(false);
@@ -593,7 +594,7 @@ const generateProfessionalCV = () => {
     ));
   };
 
-  // ============= MODERN TEMPLATE - Create page එකේ 100% SAME =============
+  // ============= MODERN TEMPLATE - Create page 100% SAME =============
   if (selectedTemplate === 'modern') {
     return (
       <div className="cv-template cv-modern bg-white" style={{ padding: '20mm', fontFamily: 'Arial, sans-serif' }}>
