@@ -1065,7 +1065,7 @@ const generateProfessionalCV = () => {
 
           {/* FORM TAB - FULLY FIXED */}
           {activeTab === 'form' && (
-            <div className="grid lg:grid-cols-2 gap-10 max-w-7xl mx-auto">
+            <div className="max-w-5xl mx-auto space-y-10">
               <div className="space-y-10">
 
                 {/* Personal Information */}
@@ -1249,45 +1249,8 @@ const generateProfessionalCV = () => {
 
                 
               </div>
-              
-
-{/* AI Assistant */}
-              <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-3xl p-6">
-                <h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-                  <Sparkles className="w-5 h-5" />
-                  AI Assistant
-                </h3>
-                <div className="space-y-4">
-                  <button
-                    onClick={generateResume}
-                    disabled={isGenerating}
-                    className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-2xl hover:shadow-lg transition disabled:opacity-50"
-                  >
-                    {isGenerating ? (
-                      <>
-                        <Loader2 className="w-4 h-4 inline mr-2 animate-spin" />
-                        Generating...
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="w-4 h-4 inline mr-2" />
-                        Generate with AI
-                      </>
-                    )}
-                  </button>
-                  <div className="text-sm text-gray-400">
-                    AI can help you:
-                    <ul className="list-disc list-inside mt-2 space-y-1">
-                      <li>Optimize your summary</li>
-                      <li>Suggest better skills</li>
-                      <li>Improve descriptions</li>
-                      <li>ATS optimization</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-  </div>
-)}
+            </div>
+          )}
 {activeTab === 'preview' && (
   <div className="max-w-4xl mx-auto my-10">
     {/* Preview Toolbar: Upload / Edit / Save / Download */}
