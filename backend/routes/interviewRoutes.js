@@ -5,7 +5,9 @@ import {
   getHistory,
   downloadReport,
   getInterview,
-  getDashboardStats
+  getDashboardStats,
+  generatePracticeQuestions,
+  scorePracticeAnswers
 } from "../controllers/interviewController.js";
 
 const router = express.Router();
@@ -16,5 +18,7 @@ router.get("/history/all", getHistory);
 router.get("/report/:id", downloadReport);
 router.get("/:id", getInterview);
 router.get("/dashboard/stats", getDashboardStats);
+router.post("/practice/generate", generatePracticeQuestions);
+router.post("/practice/score", scorePracticeAnswers);
 
 export default router;

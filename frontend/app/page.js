@@ -40,7 +40,7 @@ function Home() {
       description: "AI-generated voice-based interview questions tailored to your job role and experience",
       icon: Briefcase,
       color: "from-orange-500 to-red-500",
-      link: "/InterviewDashboard",
+      link: "/InterviewHome",
       features: ["Voice Interview", "HR & Technical Q&A", "Custom Questions", "Mock Interviews"]
     }
   ];
