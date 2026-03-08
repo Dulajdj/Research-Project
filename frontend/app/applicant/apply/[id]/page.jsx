@@ -58,7 +58,7 @@ export default function ApplyForJob() {
     formData.append("requiredSkills", job.requiredSkills || ""); 
 
     try {
-      const res = await fetch('/api/applications', {
+      const res = await fetch('http://localhost:5001/api/applications', {
         method: 'POST',
         body: formData
       });
