@@ -2,6 +2,10 @@ import dotenv from 'dotenv'; // load environment variables
 import express from 'express';
 import cors from 'cors';
 import multer from 'multer';
+import signupRoute from './routes/signup/route.js'; 
+import loginRoute from './routes/login/route.js';
+import jobRoute from './routes/jobs/route.js'; 
+import applicationRoute from './routes/applications/route.js';
 
 // prefer .env.local for development (Next.js convention); fall back to .env
 dotenv.config({ path: '.env.local' });
@@ -13,7 +17,7 @@ app.use(cors());
 app.use(express.json());
 
 // multer configuration to handle form-data uploads (in-memory storage)
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({ storage: multer.memoryStorage() }); //
 
 // import API handlers from previous Next.js code
 import {
@@ -29,7 +33,7 @@ import {
 
 
 app.get('/', (req, res) => {
-    res.send("Backend is running!");
+    res.json({ status: "success", message: "Server is running" }); // Valid JSON
 });
 
 // health check that also verifies DB connectivity (optional)
@@ -44,6 +48,11 @@ app.get('/health', async (req, res) => {
 });
 
 // --- API routes -----------------------------------------------------------
+
+app.use('/api/auth', signupRoute);
+app.use('/api/auth', loginRoute);
+app.use('/api/jobs', upload.single('file'), jobRoute); 
+app.use('/api/applications', upload.single('cv'), applicationRoute);
 
 // helper to adapt Express request to a minimal object expected by handlers
 function makeNextReq(req) {
@@ -109,6 +118,11 @@ app.put('/api/resume', async (req, res) => {
   res.status(result.status || 200).json(result.body);
 });
 
+app.post('/api/resume', async (req, res) => {
+  const result = await handleResumePOST(makeNextReq(req));
+  res.status(result.status || 201).json(result.body);
+});
+
 app.delete('/api/resume', async (req, res) => {
   const result = await handleResumeDELETE(makeNextReq(req));
   res.status(result.status || 200).json(result.body);
@@ -153,5 +167,5 @@ app.delete('/api/cover-letter', async (req, res) => {
 
 // end API routes
 
-const PORT = 5000;
+const PORT = 5001;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
