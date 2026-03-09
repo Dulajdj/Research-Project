@@ -18,10 +18,23 @@ const ApplicationSchema = new mongoose.Schema({
   cvData: { type: String, required: true }, // The actual file content
   cvName: { type: String, required: true }, // The filename (e.g., "resume.pdf")
   
-  // AI Results from Python Model
+  // --- UPDATED AI RESULTS SECTION ---
+  
+  // Skills identified in the CV (Matched Skills)
+  identifiedSkills: [{ 
+    type: String 
+  }], 
+
+  // Skills required by job but not found in CV
   missingSkills: [{ 
     type: String 
   }], 
+
+  // Detected years of experience from Python model
+  yearsOfExperience: {
+    type: Number,
+    default: 0
+  },
   
   // Metadata
   appliedAt: { 
@@ -30,7 +43,7 @@ const ApplicationSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-// Check if the model already exists before creating it (prevents errors in dev mode)
+// Check if the model already exists before creating it
 const Application = mongoose.models.Application || mongoose.model("Application", ApplicationSchema);
 
 export default Application;

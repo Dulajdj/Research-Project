@@ -5,6 +5,7 @@ import connectDB from '../../config/db.js';
 const router = express.Router();
 
 // --- GET: Fetch all jobs (Newest First) ---
+// URL: GET http://localhost:5001/api/jobs
 router.get('/', async (req, res) => {
   try {
     await connectDB();
@@ -15,13 +16,33 @@ router.get('/', async (req, res) => {
   }
 });
 
+// --- GET: Fetch a single job by ID ---
+// URL: GET http://localhost:5001/api/jobs/:id
+// This replaces the code previously in your [id] folder
+router.get('/:id', async (req, res) => {
+  try {
+    await connectDB();
+    
+    // In Express, we access the ID via req.params.id
+    const job = await Job.findById(req.params.id);
+    
+    if (!job) {
+      return res.status(404).json({ success: false, error: "Job not found" });
+    }
+
+    res.json({ success: true, data: job });
+  } catch (error) {
+    console.error("Fetch Job Error:", error);
+    res.status(500).json({ success: false, error: "Invalid Job ID format or Server Error" });
+  }
+});
+
 // --- POST: Create a new job (Handles Text + File) ---
+// URL: POST http://localhost:5001/api/jobs
 router.post('/', async (req, res) => {
   try {
-    // 1. Text data is automatically parsed into req.body by express.json and multer
     const jobData = { ...req.body };
 
-    // 2. Handle File Processing (If multer parsed a file)
     if (req.file) {
       const buf = req.file.buffer;
       jobData.fileData = `data:${req.file.mimetype};base64,${buf.toString("base64")}`;
@@ -29,7 +50,6 @@ router.post('/', async (req, res) => {
       jobData.fileType = req.file.mimetype;
     }
 
-    // 3. Save to Database
     await connectDB();
     const newJob = await Job.create(jobData);
 
