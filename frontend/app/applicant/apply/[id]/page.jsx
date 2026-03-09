@@ -4,7 +4,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { 
   Building2, MapPin, Briefcase, DollarSign, 
-  UploadCloud, FileText, CheckCircle2, ArrowLeft, Loader2, AlertCircle, BookOpen
+  UploadCloud, FileText, CheckCircle2, ArrowLeft, Loader2, AlertCircle, BookOpen, Award
 } from 'lucide-react';
 
 export default function ApplyForJob() {
@@ -14,6 +14,7 @@ export default function ApplyForJob() {
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [analysisResult, setAnalysisResult] = useState(null);
+  const [matchedSkills, setMatchedSkills] = useState([]); // Added state for matching skills
 
   // Form State
   const [applicantName, setApplicantName] = useState('');
@@ -66,6 +67,7 @@ export default function ApplyForJob() {
 
       if (res.ok) {
         setAnalysisResult(data.missingSkills || []); 
+        setMatchedSkills(data.identified_skills || []); // Capture matching skills from response
       } else {
         alert("Failed to submit application.");
       }
@@ -83,6 +85,7 @@ export default function ApplyForJob() {
     // Encode skills into the URL
     const skillsQuery = encodeURIComponent(analysisResult.join(','));
     router.push(`/applicant/recommendations?skills=${skillsQuery}`);
+    
   };
 
   if (loading) return <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center text-white"><Loader2 className="w-10 h-10 animate-spin text-purple-400" /></div>;
@@ -92,7 +95,7 @@ export default function ApplyForJob() {
   if (analysisResult !== null) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-6 text-white">
-        <div className="bg-slate-800/80 backdrop-blur-xl p-8 rounded-3xl max-w-lg w-full border border-white/10 shadow-2xl animate-in zoom-in-95 duration-300">
+        <div className="bg-slate-800/80 backdrop-blur-xl p-8 rounded-3xl max-w-2xl w-full border border-white/10 shadow-2xl animate-in zoom-in-95 duration-300">
           
           <div className="text-center mb-8">
             <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-green-500/30">
@@ -103,10 +106,31 @@ export default function ApplyForJob() {
           </div>
 
           <div className="bg-slate-900/60 p-6 rounded-2xl border border-white/10 mb-8">
-            <h3 className="font-semibold mb-4 flex items-center gap-2 text-lg">
+            <h3 className="font-semibold mb-6 flex items-center gap-2 text-lg">
               <span className="text-purple-400">AI Skill Analysis</span>
             </h3>
+
+            {/* Added Matching Skills display */}
+            <div className="mb-6">
+              <h4 className="text-sm font-medium text-green-400 flex items-center gap-2 mb-3">
+                <Award className="w-4 h-4" /> Matched Skills
+              </h4>
+              <div className="flex flex-wrap gap-2">
+                {matchedSkills.length > 0 ? (
+                  matchedSkills.map((skill, i) => (
+                    <span key={i} className="px-3 py-1.5 bg-green-500/10 text-green-300 border border-green-500/20 rounded-lg text-sm font-medium">
+                      {skill}
+                    </span>
+                  ))
+                ) : (
+                  <p className="text-sm text-gray-500 italic">No specific matches identified.</p>
+                )}
+              </div>
+            </div>
             
+            <h4 className="text-sm font-medium text-red-400 flex items-center gap-2 mb-3">
+              <AlertCircle className="w-4 h-4" /> Missing Skills
+            </h4>
             {analysisResult.length === 0 ? (
               <div className="text-center py-4">
                 <p className="text-green-400 font-medium text-lg">Perfect Match!</p>
