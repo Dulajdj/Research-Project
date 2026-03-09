@@ -11,7 +11,7 @@ Our system integrates **Large Language Models (LLMs)**, **voice-based AI**, **sk
 
 ---
 
-⚙️ Github Repo (https://github.com/IT22269652/Research)
+⚙️ Github Repo (https://github.com/Dulajdj/Research-Project.git)
 
 📊 System Overview Diagram
 
