@@ -7,6 +7,19 @@ import { useRouter } from 'next/navigation';
 export default function CompanySidebar() {
   const router = useRouter();
 
+  // Logic to handle user logout
+  const handleLogout = () => {
+    // 1. Remove authentication tokens from local storage
+    localStorage.removeItem('token'); 
+    localStorage.removeItem('user'); 
+    
+    // 2. Clear cookies if your system uses them for auth
+    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+
+    // 3. Redirect back to the home page or login screen
+    router.push("/"); 
+  };
+
   return (
     <aside className="w-72 h-screen bg-slate-900/80 backdrop-blur-lg border-r border-purple-500/20 p-6 hidden md:block">
       <div className="flex items-center space-x-2 mb-10">
@@ -58,7 +71,7 @@ export default function CompanySidebar() {
         </button>
 
         <button
-          onClick={() => router.push("/logout")}
+          onClick={handleLogout} // Updated to call logout logic
           className="flex items-center space-x-3 text-red-400 hover:text-red-500 transition w-full text-left mt-10"
         >
           <LogOut className="w-5 h-5" />
