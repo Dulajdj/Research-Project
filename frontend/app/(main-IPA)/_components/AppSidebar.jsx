@@ -39,7 +39,6 @@ const NAV_GROUPS = [
     items: [
       { title: "Progress Tracker", icon: TrendingUp, url: "/InterviewDashboard/Progress" },
       { title: "Interview History", icon: ClipboardList, url: "/InterviewDashboard/History" },
-      { title: "AI Coach", icon: Bot, url: "/InterviewDashboard/AICoach" },
     ]
   },
   {

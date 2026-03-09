@@ -385,31 +385,12 @@ export default function Settings() {
                 <SettingSelect value={s.voiceGender} onChange={v => update("voiceGender", v)} options={[
                   { value: "female",  label: "Female"  },
                   { value: "male",    label: "Male"    },
-                  { value: "neutral", label: "Neutral" },
                 ]}/>
               </Row>
               <Row label="Show countdown timer" desc="Display a timer during interview and practice sessions">
                 <Toggle value={s.showTimer} onChange={v => update("showTimer", v)} accent={accentHex}/>
               </Row>
-              <Row label="Auto-advance questions" desc="Jump to next question automatically when timer expires">
-                <Toggle value={s.autoNext} onChange={v => update("autoNext", v)} accent={accentHex}/>
-              </Row>
-              <SliderRow
-                label="AI Voice Speed"
-                desc="How fast the AI narrates questions (takes effect on next session)"
-                accent={accentHex}
-                value={s.voiceSpeed} min={0.5} max={1.5} step={0.1}
-                onChange={v => update("voiceSpeed", v)}
-                formatLabel={v => `${v.toFixed(1)}×`}
-              />
-              <SliderRow
-                label="Practice Timer Duration"
-                desc="Seconds allowed per question in Practice Mode"
-                last accent={accentHex}
-                value={s.timerDuration} min={30} max={300} step={30}
-                onChange={v => update("timerDuration", v)}
-                formatLabel={v => v >= 60 ? `${Math.floor(v/60)}m${v%60 ? ` ${v%60}s` : ""}` : `${v}s`}
-              />
+             
             </Section>
 
             {/* ─── PRIVACY & DATA ─── */}
@@ -419,9 +400,6 @@ export default function Settings() {
               </Row>
               <Row label="Usage analytics" desc="Share anonymous usage data to help improve the app">
                 <Toggle value={s.analytics} onChange={v => update("analytics", v)} accent={accentHex}/>
-              </Row>
-              <Row label="Share performance data" desc="Allow scores to contribute to anonymised benchmarks" last>
-                <Toggle value={s.shareData} onChange={v => update("shareData", v)} accent={accentHex}/>
               </Row>
             </Section>
 
@@ -438,8 +416,6 @@ export default function Settings() {
               {[
                 { scope: "history",   label: "Clear Interview History",  desc: "Permanently delete all past interview results and scores"   },
                 { scope: "progress",  label: "Reset Progress Data",      desc: "Wipe all progress charts and performance statistics"        },
-                { scope: "questions", label: "Clear Saved Questions",    desc: "Remove all bookmarked questions from the Question Bank"     },
-                { scope: "settings",  label: "Reset All Settings",       desc: "Restore every setting back to factory defaults"             },
               ].map(({ scope, label, desc }, i, a) => (
                 <div key={scope} className="danger-row"
                   style={{ borderBottom: i < a.length - 1 ? "1px solid rgba(239,68,68,0.07)" : "none" }}
