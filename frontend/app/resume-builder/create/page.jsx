@@ -10,7 +10,8 @@ import { Toaster } from 'react-hot-toast';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || ''; // backend base URL
+// backend base URL; override with NEXT_PUBLIC_API_URL in production
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'; // backend base URL
 
 
 export default function ResumeBuilderCreate() {
@@ -45,7 +46,6 @@ export default function ResumeBuilderCreate() {
     experience: [],
     education: [],
     projects: [],
-    certifications: [],
     references: []
   });
 
@@ -345,7 +345,6 @@ useEffect(() => {
     experience: [],
     education: [],
     projects: [],
-    certifications: [],
     references: []
   });
 
@@ -599,7 +598,6 @@ useEffect(() => {
         experience: Array.isArray(data.experience) ? data.experience : prev.experience,
         education: Array.isArray(data.education) ? data.education : prev.education,
         projects: Array.isArray(data.projects) ? data.projects : prev.projects,
-        certifications: Array.isArray(data.certifications) ? data.certifications : prev.certifications,
         references: Array.isArray(data.references) ? data.references : prev.references,
         selectedTemplate: data.selectedTemplate || prev.selectedTemplate || 'modern'
       }));
@@ -640,7 +638,6 @@ useEffect(() => {
         experience: Array.isArray(data.experience) ? data.experience : prev.experience,
         education: Array.isArray(data.education) ? data.education : prev.education,
         projects: Array.isArray(data.projects) ? data.projects : prev.projects,
-        certifications: Array.isArray(data.certifications) ? data.certifications : prev.certifications,
         references: Array.isArray(data.references) ? data.references : prev.references,
         selectedTemplate: data.selectedTemplate || prev.selectedTemplate || 'modern'
       }));
@@ -760,7 +757,7 @@ const generateAiSummary = async () => {
       setFormData(prev => ({ ...prev, summary: data.summary }));
       toast.success('Summary generated!');
     } else {
-      // Router error එකක් ආවොත් පරිශීලකයාට පණිවිඩයක් පෙන්වන්න
+    
       if (data.error && data.error.includes('router')) {
         toast.error('AI is warming up. Please click again in 10 seconds.');
       } else {
@@ -799,7 +796,7 @@ const saveResume = async () => {
       experience: formData.experience,
       education: formData.education,
       projects: formData.projects,
-      certifications: formData.certifications,
+      references: formData.references,
       selectedTemplate
     };
     const bodyString = JSON.stringify(bodyObj);
@@ -823,15 +820,12 @@ const saveResume = async () => {
         toast.error('Saved resume did NOT contain a photo', { duration: 5000 });
       }
 
-      // Store the saved resume in sessionStorage as a short-lived cache so the Edit page can display it immediately
+      // Store the saved resume in sessionStorage as a short-lived cache so the Edit page can display it immediately if the user chooses to edit.
       try {
         sessionStorage.setItem('recentlySavedResume', JSON.stringify(saved));
       } catch (e) {
         console.warn('Failed to write recentlySavedResume to sessionStorage', e);
       }
-
-      // Navigate to edit page to ensure it performs a fresh fetch and displays the saved photo
-      router.push(`/resume-builder/edit/${saved._id}`);
 
     } else {
       throw new Error();
@@ -846,7 +840,7 @@ const saveResume = async () => {
 
 
   const generateMarkdown = () => {
-    const { personalInfo, summary, skills, experience, education, projects, certifications } = formData;
+    const { personalInfo, summary, skills, experience, education, projects, references } = formData;
     
     let markdown = `# ${personalInfo.fullName}\n\n`;
     
@@ -903,14 +897,12 @@ const saveResume = async () => {
       });
     }
 
-    // Certifications
-    if (certifications.length > 0) {
-      markdown += `## Certifications\n\n`;
-      certifications.forEach(cert => {
-        markdown += `### ${cert.title} - ${cert.company}\n`;
-        markdown += `*${cert.startDate} - ${cert.current ? 'Present' : cert.endDate}*\n`;
-        if (cert.location) markdown += `📍 ${cert.location}\n`;
-        markdown += `\n${cert.description}\n\n`;
+    // References
+    if (references.length > 0) {
+      markdown += `## References\n\n`;
+      references.forEach(ref => {
+        markdown += `### ${ref.title} - ${ref.company}\n`;
+        markdown += `\n${ref.description}\n\n`;
       });
     }
 
@@ -918,7 +910,7 @@ const saveResume = async () => {
   };
 
   const generateProfessionalCV = () => {
-    const { personalInfo, summary, skills, technicalSkills, experience, education, projects, certifications, references } = formData;
+    const { personalInfo, summary, skills, technicalSkills, experience, education, projects, references } = formData;
     
     const ReferenceItem = ({ refData }) => (
         <div className="cv-item">
@@ -1046,25 +1038,6 @@ const saveResume = async () => {
               </div>
             )}
 
-            {/* Certifications */}
-            {certifications.length > 0 && (
-              <div className="cv-section">
-                <h2 className="cv-section-title">Certifications</h2>
-                {certifications.map((cert, index) => (
-                  <div key={index} className="cv-item">
-                    <div className="cv-item-header">
-                      <h3 className="cv-item-title">{cert.title}</h3>
-                      <span className="cv-item-company">{cert.company}</span>
-                      <span className="cv-item-date">
-                        {cert.startDate} - {cert.current ? 'Present' : cert.endDate}
-                      </span>
-                    </div>
-                    {cert.location && <div className="cv-item-location">📍 {cert.location}</div>}
-                    <div className="cv-item-description">{cert.description}</div>
-                  </div>
-                ))}
-              </div>
-            )}
 
             {/* References - Added at the end */}
             {references.length > 0 && (
@@ -1191,27 +1164,6 @@ const saveResume = async () => {
               </div>
             )}
 
-            {/* Certifications */}
-            {certifications.length > 0 && (
-              <div className="cv-section">
-                <h2 className="cv-section-title">CERTIFICATIONS</h2>
-                {certifications.map((cert, index) => (
-                  <div key={index} className="cv-item">
-                    <div className="cv-item-header">
-                      <h3 className="cv-item-title">{cert.title}</h3>
-                      <span className="cv-item-company">{cert.company}</span>
-                      <span className="cv-item-date">
-                        {cert.startDate} - {cert.current ? 'Present' : cert.endDate}
-                      </span>
-                    </div>
-                    {cert.location && <div className="cv-item-location">{cert.location}</div>}
-                    <div className="cv-item-description">{cert.description}</div>
-                  </div>
-                ))}
-              </div>
-
-              
-            )}
 
             {/* References - Added at the end */}
             {references.length > 0 && (
@@ -1336,25 +1288,6 @@ const saveResume = async () => {
               </div>
             )}
 
-            {/* Certifications */}
-            {certifications.length > 0 && (
-              <div className="cv-section">
-                <h2 className="cv-section-title">🏆 Certifications</h2>
-                {certifications.map((cert, index) => (
-                  <div key={index} className="cv-item">
-                    <div className="cv-item-header">
-                      <h3 className="cv-item-title">{cert.title}</h3>
-                      <span className="cv-item-company">{cert.company}</span>
-                      <span className="cv-item-date">
-                        {cert.startDate} - {cert.current ? 'Present' : cert.endDate}
-                      </span>
-                    </div>
-                    {cert.location && <div className="cv-item-location">📍 {cert.location}</div>}
-                    <div className="cv-item-description">{cert.description}</div>
-                  </div>
-                ))}
-              </div>
-            )}
 
             {/* References - Added at the end */}
             {references.length > 0 && (
@@ -1375,7 +1308,7 @@ const saveResume = async () => {
   };
 
   const generateProfessionalCVHTML = () => {
-    const { personalInfo, summary, skills, experience, education, projects, certifications } = formData;
+    const { personalInfo, summary, skills, experience, education, projects, references } = formData;
     
     let html = '';
     
@@ -1458,24 +1391,6 @@ const saveResume = async () => {
         if (proj.url) html += `<div class="cv-item-link">🔗 <a href="${proj.url}">View Project</a></div>`;
         if (proj.stars && proj.stars > 0) html += `<div class="cv-item-stats">⭐ ${proj.stars} stars | 🍴 ${proj.forks} forks</div>`;
         html += `<div class="cv-item-description">${proj.description}</div>`;
-        html += '</div>';
-      });
-      html += '</div>';
-    }
-
-    // Certifications
-    if (certifications.length > 0) {
-      html += '<div class="cv-section">';
-      html += '<h2 class="cv-section-title">Certifications</h2>';
-      certifications.forEach(cert => {
-        html += '<div class="cv-item">';
-        html += '<div class="cv-item-header">';
-        html += `<h3 class="cv-item-title">${cert.title}</h3>`;
-        html += `<span class="cv-item-company">${cert.company}</span>`;
-        html += `<span class="cv-item-date">${cert.startDate} - ${cert.current ? 'Present' : cert.endDate}</span>`;
-        html += '</div>';
-        if (cert.location) html += `<div class="cv-item-location">📍 ${cert.location}</div>`;
-        html += `<div class="cv-item-description">${cert.description}</div>`;
         html += '</div>';
       });
       html += '</div>';
@@ -1679,7 +1594,7 @@ const saveResume = async () => {
 
           {/* Content */}
           {activeTab === 'form' && (
-            <div className="grid lg:grid-cols-2 gap-8">
+            <div className="max-w-5xl mx-auto space-y-6">
               {/* Form */}
               <div className="space-y-6">
                 {/* Personal Information */}
@@ -2155,41 +2070,6 @@ const saveResume = async () => {
                 </div>
               </div>
 
-              {/* AI Assistant */}
-              <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-3xl p-6">
-                <h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-                  <Sparkles className="w-5 h-5" />
-                  AI Assistant
-                </h3>
-                <div className="space-y-4">
-                  <button
-                    onClick={generateResume}
-                    disabled={isGenerating}
-                    className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-2xl hover:shadow-lg transition disabled:opacity-50"
-                  >
-                    {isGenerating ? (
-                      <>
-                        <Loader2 className="w-4 h-4 inline mr-2 animate-spin" />
-                        Generating...
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="w-4 h-4 inline mr-2" />
-                        Generate with AI
-                      </>
-                    )}
-                  </button>
-                  <div className="text-sm text-gray-400">
-                    AI can help you:
-                    <ul className="list-disc list-inside mt-2 space-y-1">
-                      <li>Optimize your summary</li>
-                      <li>Suggest better skills</li>
-                      <li>Improve descriptions</li>
-                      <li>ATS optimization</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
             </div>
           )}
 

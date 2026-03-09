@@ -2,6 +2,12 @@ import dotenv from 'dotenv'; // load environment variables
 import express from 'express';
 import cors from 'cors';
 import multer from 'multer';
+
+import signupRoute from './routes/signup/route.js'; 
+import loginRoute from './routes/login/route.js';
+import jobRoute from './routes/jobs/route.js'; 
+import applicationRoute from './routes/applications/route.js';
+
 import connectDB from './config/db.js';
 import interviewRoutes from "./routes/interviewRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
@@ -16,7 +22,7 @@ app.use(cors());
 app.use(express.json());
 
 // multer configuration to handle form-data uploads (in-memory storage)
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({ storage: multer.memoryStorage() }); //
 
 // Routes
 app.use("/api/interview", interviewRoutes);
@@ -36,7 +42,7 @@ import {
 
 
 app.get('/', (req, res) => {
-    res.send("Backend is running!");
+    res.json({ status: "success", message: "Server is running" }); // Valid JSON
 });
 
 // health check that also verifies DB connectivity (optional)
@@ -50,6 +56,11 @@ app.get('/health', async (req, res) => {
 });
 
 // --- API routes -----------------------------------------------------------
+
+app.use('/api/auth', signupRoute);
+app.use('/api/auth', loginRoute);
+app.use('/api/jobs', upload.single('file'), jobRoute); 
+app.use('/api/applications', upload.single('cv'), applicationRoute);
 
 // helper to adapt Express request to a minimal object expected by handlers
 function makeNextReq(req) {
@@ -115,6 +126,11 @@ app.put('/api/resume', async (req, res) => {
   res.status(result.status || 200).json(result.body);
 });
 
+app.post('/api/resume', async (req, res) => {
+  const result = await handleResumePOST(makeNextReq(req));
+  res.status(result.status || 201).json(result.body);
+});
+
 app.delete('/api/resume', async (req, res) => {
   const result = await handleResumeDELETE(makeNextReq(req));
   res.status(result.status || 200).json(result.body);
@@ -157,7 +173,8 @@ app.delete('/api/cover-letter', async (req, res) => {
   }
 });
 
-const PORT = 5000;
+// read port from environment so we can run on 3001 when needed
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 5000;
 
 // connect database before starting server
 connectDB()
