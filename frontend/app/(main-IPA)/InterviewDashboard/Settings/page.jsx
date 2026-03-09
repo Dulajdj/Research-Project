@@ -412,57 +412,6 @@ export default function Settings() {
               />
             </Section>
 
-            {/* ─── APPEARANCE ─── */}
-            <Section icon="🎨" title="Appearance" subtitle="Live preview — changes apply instantly" accent="#06b6d4">
-              <Row label="Accent Color" desc="Highlight color used across buttons, rings, and active states">
-                <div className="swatches">
-                  {accents.map(a => (
-                    <div
-                      key={a.value}
-                      className={`swatch ${s.accentColor === a.value ? "on" : ""}`}
-                      style={{ background: a.color }}
-                      onClick={() => update("accentColor", a.value)}
-                      title={a.value}
-                    />
-                  ))}
-                </div>
-              </Row>
-              <Row label="Font Size" desc="Base text size across the interface">
-                <SettingSelect value={s.fontSize} onChange={v => update("fontSize", v)} options={[
-                  { value: "small",  label: "Small (13px)"  },
-                  { value: "medium", label: "Medium (15px)" },
-                  { value: "large",  label: "Large (17px)"  },
-                ]}/>
-              </Row>
-              <Row label="Compact Mode" desc="Reduce padding for a denser, tighter layout">
-                <Toggle value={s.compactMode} onChange={v => update("compactMode", v)} accent={accentHex}/>
-              </Row>
-              <Row label="Animations" desc="Enable transitions and micro-interactions throughout the app" last>
-                <Toggle value={s.animations} onChange={v => update("animations", v)} accent={accentHex}/>
-              </Row>
-            </Section>
-
-            {/* ─── NOTIFICATIONS ─── */}
-            <Section icon="🔔" title="Notifications" subtitle="Choose when and how you get reminded" accent="#f59e0b">
-              <Row label="Email notifications" desc="Receive session summaries and weekly tips by email">
-                <Toggle value={s.emailNotifs} onChange={v => update("emailNotifs", v)} accent={accentHex}/>
-              </Row>
-              <Row label="Practice reminders" desc="Get nudged to keep your interview skills sharp">
-                <Toggle value={s.practiceReminder} onChange={v => update("practiceReminder", v)} accent={accentHex}/>
-              </Row>
-              <Row label="Reminder frequency" desc="How often to send practice reminders">
-                <SettingSelect value={s.reminderFreq} onChange={v => update("reminderFreq", v)} options={[
-                  { value: "daily",      label: "Daily"       },
-                  { value: "every2days", label: "Every 2 days"},
-                  { value: "weekly",     label: "Weekly"      },
-                  { value: "never",      label: "Never"       },
-                ]}/>
-              </Row>
-              <Row label="Session complete alerts" desc="Notify when an interview session finishes" last>
-                <Toggle value={s.sessionAlerts} onChange={v => update("sessionAlerts", v)} accent={accentHex}/>
-              </Row>
-            </Section>
-
             {/* ─── PRIVACY & DATA ─── */}
             <Section icon="🔒" title="Privacy & Data" subtitle="Control how your data is stored and shared" accent="#10b981">
               <Row label="Save interview history" desc="Store past sessions so you can review your progress">
@@ -476,20 +425,6 @@ export default function Settings() {
               </Row>
             </Section>
 
-            {/* ─── ABOUT ─── */}
-            <Section icon="ℹ️" title="About" subtitle="VoicePrep AI — application information" accent="#64748b">
-              {[
-                ["Version",       "1.0.0"],
-                ["AI Model",      "GPT-3.5 Turbo · OpenRouter"],
-                ["Speech Engine", "Web Speech API"],
-                ["PDF Parser",    "pdfjs-dist"],
-                ["Framework",     "Next.js 14 (App Router)"],
-              ].map(([k, v], i, a) => (
-                <Row key={k} label={k} last={i === a.length - 1}>
-                  <span className="info-badge">{v}</span>
-                </Row>
-              ))}
-            </Section>
 
             {/* ─── DANGER ZONE ─── */}
             <div className="danger-wrap">

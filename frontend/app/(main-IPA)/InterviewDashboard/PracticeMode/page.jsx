@@ -21,6 +21,9 @@ export default function PracticeMode() {
   const timerRef = useRef(null);
   const savedJobRole = useRef("");
 
+  const MIN_QUESTIONS = 1;
+  const MAX_QUESTIONS = 20;
+
   // ===================== TIMER =====================
   useEffect(() => {
     if (timerActive && timeLeft > 0) {
@@ -157,6 +160,10 @@ export default function PracticeMode() {
     setMicOn(true);
   };
 
+  // ===================== STEPPER HANDLERS =====================
+  const decreaseCount = () => setQuestionCount(prev => Math.max(MIN_QUESTIONS, prev - 1));
+  const increaseCount = () => setQuestionCount(prev => Math.min(MAX_QUESTIONS, prev + 1));
+
   const timerPct = (timeLeft / 120) * 100;
   const timerColor = timeLeft > 60 ? "#4ade80" : timeLeft > 30 ? "#facc15" : "#f87171";
   const totalScore = scores?.totalScore ?? 0;
@@ -181,10 +188,18 @@ export default function PracticeMode() {
         .setup-input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 13px 16px; color: #f1f5f9; font-size: 15px; font-family: 'Outfit', sans-serif; outline: none; transition: border-color 0.2s; margin-bottom: 20px; }
         .setup-input:focus { border-color: rgba(124,58,237,0.5); }
         .setup-input::placeholder { color: #475569; }
-        .count-row { display: flex; gap: 8px; margin-bottom: 28px; flex-wrap: wrap; }
-        .count-btn { padding: 8px 18px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); color: #94a3b8; transition: all 0.18s; font-family: 'Outfit', sans-serif; }
-        .count-btn:hover { background: rgba(124,58,237,0.15); color: #c4b5fd; }
-        .count-btn.active { background: rgba(124,58,237,0.25); color: #c4b5fd; border-color: rgba(124,58,237,0.45); }
+
+        /* ── Stepper ── */
+        .stepper-wrap { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
+        .stepper { display: flex; align-items: center; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; overflow: hidden; }
+        .stepper-btn { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; cursor: pointer; border: none; background: transparent; color: #94a3b8; font-family: 'Outfit', sans-serif; transition: background 0.15s, color 0.15s; user-select: none; line-height: 1; }
+        .stepper-btn:hover:not(:disabled) { background: rgba(124,58,237,0.22); color: #c4b5fd; }
+        .stepper-btn:active:not(:disabled) { background: rgba(124,58,237,0.35); }
+        .stepper-btn:disabled { opacity: 0.25; cursor: not-allowed; }
+        .stepper-divider { width: 1px; height: 26px; background: rgba(255,255,255,0.1); flex-shrink: 0; }
+        .stepper-val { min-width: 72px; text-align: center; font-size: 18px; font-weight: 800; color: #c4b5fd; font-family: 'DM Mono', monospace; padding: 0 4px; }
+        .stepper-hint { font-size: 12px; color: #475569; }
+
         .start-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; background: linear-gradient(135deg,#7c3aed,#4f46e5); color: white; padding: 14px 32px; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; border: none; font-family: 'Outfit', sans-serif; transition: all 0.2s; box-shadow: 0 0 24px rgba(124,58,237,0.35); }
         .start-btn:hover { transform: translateY(-2px); box-shadow: 0 0 36px rgba(124,58,237,0.5); }
         .start-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
@@ -257,16 +272,35 @@ export default function PracticeMode() {
             />
 
             <label className="setup-label">Number of Questions</label>
-            <div className="count-row">
-              {[3, 5, 7, 10].map(n => (
+            <div className="stepper-wrap">
+              <div className="stepper">
                 <button
-                  key={n}
-                  className={`count-btn ${questionCount === n ? "active" : ""}`}
-                  onClick={() => setQuestionCount(n)}
+                  className="stepper-btn"
+                  onClick={decreaseCount}
+                  disabled={questionCount <= MIN_QUESTIONS}
+                  aria-label="Decrease question count"
                 >
-                  {n} Questions
+                  −
                 </button>
-              ))}
+                <div className="stepper-divider" />
+                <div className="stepper-val">{questionCount}</div>
+                <div className="stepper-divider" />
+                <button
+                  className="stepper-btn"
+                  onClick={increaseCount}
+                  disabled={questionCount >= MAX_QUESTIONS}
+                  aria-label="Increase question count"
+                >
+                  +
+                </button>
+              </div>
+              <span className="stepper-hint">
+                {questionCount === MIN_QUESTIONS
+                  ? "Minimum reached"
+                  : questionCount === MAX_QUESTIONS
+                  ? "Maximum reached"
+                  : `${MIN_QUESTIONS}–${MAX_QUESTIONS} questions`}
+              </span>
             </div>
 
             <button

@@ -7,7 +7,6 @@ import toast from "react-hot-toast";
 
 export default function CreateInterview() {
   const router = useRouter();
-
   const [formData, setFormData] = useState({
     jobRole: "",
     experienceLevel: "",
