@@ -31,6 +31,18 @@ const interviewSchema = new mongoose.Schema({
     }
   ],
 
+  // ✅ NEW: Stores the meeting style based on interview type selected
+  meetingStyle: {
+    type: String,
+    default: "standard"
+  },
+
+  // ✅ NEW: Extra AI greeting instruction based on interview type
+  aiGreetingExtra: {
+    type: String,
+    default: ""
+  },
+
   createdAt: {
     type: Date,
     default: Date.now
