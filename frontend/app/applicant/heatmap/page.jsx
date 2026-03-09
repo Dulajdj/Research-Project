@@ -6,8 +6,8 @@ import { Map, ArrowLeft, Loader2, MapPin } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 // --- FIXED IMPORT PATH ---
-// We use '@/components/...' instead of dots. This is safer.
-const JobHeatmap = dynamic(() => import('@/components/JobHeatmap'), {
+// We move up 3 levels: heatmap (1) -> applicant (2) -> app (3) -> then into components
+const JobHeatmap = dynamic(() => import('../../../applicant/heatmap'), {
   ssr: false,
   loading: () => (
     <div className="h-full w-full flex items-center justify-center bg-slate-800 text-gray-400">
@@ -25,7 +25,8 @@ export default function JobHeatmapPage() {
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        const res = await fetch('/api/jobs');
+        // Updated to use Port 5000 to match your Node.js backend configuration
+        const res = await fetch('http://localhost:5001/api/jobs');
         const data = await res.json();
         if (data.success) {
           setJobs(data.data);
@@ -63,7 +64,9 @@ export default function JobHeatmapPage() {
           
           <div className="bg-slate-800/80 backdrop-blur border border-white/10 px-5 py-2 rounded-xl text-sm flex items-center gap-3 shadow-lg">
             <div className="flex flex-col items-end">
-              <span className="text-purple-400 font-bold text-lg leading-none">{jobs.length}</span>
+              <span className="text-purple-400 font-bold text-lg leading-none">
+                {loading ? "..." : jobs.length}
+              </span>
               <span className="text-gray-400 text-xs uppercase">Active Jobs</span>
             </div>
             <div className="h-8 w-px bg-white/10"></div>
@@ -74,8 +77,8 @@ export default function JobHeatmapPage() {
         {/* Map Container */}
         <div className="flex-1 bg-slate-800 border-4 border-slate-700 rounded-3xl shadow-2xl overflow-hidden relative">
           
-          {/* THE MAP */}
-          <JobHeatmap jobs={jobs} />
+          {/* THE MAP COMPONENT */}
+          {!loading && <JobHeatmap jobs={jobs} />}
 
           {/* Legend Overlay */}
           <div className="absolute bottom-6 right-6 bg-slate-900/90 backdrop-blur-md border border-white/10 p-4 rounded-xl z-[400] shadow-xl">
@@ -89,7 +92,6 @@ export default function JobHeatmapPage() {
           </div>
 
         </div>
-
       </div>
     </div>
   );

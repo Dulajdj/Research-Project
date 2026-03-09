@@ -71,7 +71,7 @@ export default function AddNewJobPost() {
     if (file) dataToSend.append('file', file);
 
     try {
-      const res = await fetch('http://localhost:5000/api/jobs', {
+      const res = await fetch('http://localhost:5001/api/jobs', {
   method: 'POST',
   body: dataToSend,
 });
