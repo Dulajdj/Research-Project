@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { ArrowLeft, Trash2, Edit, FileText, Loader2 } from 'lucide-react';
 import { toast, Toaster } from 'react-hot-toast';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
+// default to the local backend server if no env var provided
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 export default function SavedResumes() {
   const [resumes, setResumes] = useState([]);
@@ -43,8 +44,7 @@ export default function SavedResumes() {
           skills: item.skills || '',
           experience: Array.isArray(item.experience) ? item.experience : [],
           education: Array.isArray(item.education) ? item.education : [],
-          projects: Array.isArray(item.projects) ? item.projects : [],
-          certifications: Array.isArray(item.certifications) ? item.certifications : []
+          projects: Array.isArray(item.projects) ? item.projects : []
         }
       }));
 
