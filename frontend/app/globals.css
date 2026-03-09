@@ -260,6 +260,7 @@
   line-height: 1.6;
   color: #374151;
   margin: 0;
+  white-space: pre-line;
 }
 
 .cv-skills {
@@ -338,6 +339,7 @@
   line-height: 1.5;
   color: #374151;
   margin: 0;
+  white-space: pre-line;
 }
 
 /* PDF-specific CV styles */
@@ -462,7 +464,7 @@
   --border: #e2e8f0;
   --input: #e2e8f0;
   --ring: #0f172a;
-  
+
   /* Charts - mapped to safe hex */
   --chart-1: #e76e50;
   --chart-2: #2a9d8f;

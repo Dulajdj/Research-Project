@@ -4,7 +4,8 @@ import React, { useState } from 'react';
 import { ArrowLeft, CheckCircle, AlertTriangle, TrendingUp, Target, FileText, Upload, Sparkles, Loader2, Download, Eye } from 'lucide-react';
 import Link from 'next/link';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
+// backend base URL; override with NEXT_PUBLIC_API_URL when available
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 export default function ResumeChecker() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -379,7 +380,7 @@ const analyzeResume = async () => {
                   className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-4 rounded-2xl hover:shadow-lg transition text-center"
                 >
                   <Eye className="w-5 h-5 inline mr-2" />
-                  Edit with AI Builder
+                  Create New Resume 
                 </Link>
               </div>
             </div>
