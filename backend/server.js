@@ -12,6 +12,7 @@ import connectDB from './config/db.js';
 import interviewRoutes from "./routes/interviewRoutes.js";
 
 
+
 // prefer .env.local for development (Next.js convention); fall back to .env
 dotenv.config({ path: '.env.local' });
 dotenv.config();

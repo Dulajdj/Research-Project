@@ -7,7 +7,8 @@ import { useRouter } from 'next/navigation';
 
 // --- FIXED IMPORT PATH ---
 // We move up 3 levels: heatmap (1) -> applicant (2) -> app (3) -> then into components
-const JobHeatmap = dynamic(() => import('../../../applicant/heatmap'), {
+// heatmap -> applicant -> app -> frontend -> components
+const JobHeatmap = dynamic(() => import('../../../components/JobHeatmap'), {
   ssr: false,
   loading: () => (
     <div className="h-full w-full flex items-center justify-center bg-slate-800 text-gray-400">
@@ -25,7 +26,7 @@ export default function JobHeatmapPage() {
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        // Updated to use Port 5000 to match your Node.js backend configuration
+        // Syncing with your backend running on Port 5001
         const res = await fetch('http://localhost:5001/api/jobs');
         const data = await res.json();
         if (data.success) {
@@ -85,7 +86,6 @@ export default function JobHeatmapPage() {
             <h4 className="text-[10px] font-bold uppercase text-gray-400 mb-2 tracking-wider">Hiring Density</h4>
             <div className="flex items-center gap-3">
               <span className="text-xs text-gray-400 font-medium">Low</span>
-              {/* Gradient Bar */}
               <div className="w-32 h-3 bg-gradient-to-r from-blue-500 via-lime-500 to-red-500 rounded-full shadow-inner"></div>
               <span className="text-xs text-white font-bold">High</span>
             </div>

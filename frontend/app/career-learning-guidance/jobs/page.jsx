@@ -33,7 +33,7 @@ export default function ApplicantJobBoard() {
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        const res = await fetch('http://localhost:5001/api/jobs');
+        const res = await fetch('http://localhost:5000/api/jobs');
         const data = await res.json();
         if (data.success) {
           setJobs(data.data);
