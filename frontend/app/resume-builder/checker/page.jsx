@@ -234,7 +234,7 @@ const analyzeResume = async () => {
                     {isAnalyzing ? (
                       <>
                         <Loader2 className="w-5 h-5 inline mr-2 animate-spin" />
-                        Analyzing with Gemini AI...
+                        Analyzing with AI...
                       </>
                     ) : (
                       <>

@@ -2,8 +2,61 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Trash2, Edit, FileText, Loader2 } from 'lucide-react';
+import { ArrowLeft, Trash2, Edit, FileText, Loader2, BarChart3, Target } from 'lucide-react';
 import { toast, Toaster } from 'react-hot-toast';
+
+// ── Animated counter ─────────────────────────────────────────────────────────
+function AnimatedNumber({ value, suffix = "" }) {
+  const [display, setDisplay] = useState(0);
+
+  useEffect(() => {
+    const target = parseFloat(value) || 0;
+    if (target === 0) {
+      setDisplay(0);
+      return;
+    }
+
+    let start = 0;
+    const step = Math.max(1, target / 40);
+    const timer = setInterval(() => {
+      start += step;
+      if (start >= target) {
+        setDisplay(target);
+        clearInterval(timer);
+      } else {
+        setDisplay(Math.floor(start));
+      }
+    }, 25);
+
+    return () => clearInterval(timer);
+  }, [value]);
+
+  return <>{display}{suffix}</>;
+}
+
+// ── Radial progress ring ──────────────────────────────────────────────────────
+function Ring({ value = 0, color = "#a78bfa", size = 72, stroke = 6 }) {
+  const r = (size - stroke) / 2;
+  const circ = 2 * Math.PI * r;
+  const offset = circ - (value / 100) * circ;
+  return (
+    <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
+      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth={stroke} />
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={r}
+        fill="none"
+        stroke={color}
+        strokeWidth={stroke}
+        strokeDasharray={circ}
+        strokeDashoffset={offset}
+        strokeLinecap="round"
+        style={{ transition: "stroke-dashoffset 0.8s cubic-bezier(.4,0,.2,1)" }}
+      />
+    </svg>
+  );
+}
 
 // default to the local backend server if no env var provided
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
@@ -77,6 +130,78 @@ export default function SavedResumes() {
     }
   };
 
+  const computeCompletion = (resume) => {
+    const fields = [
+      resume.formData?.personalInfo?.fullName,
+      resume.formData?.personalInfo?.email,
+      resume.formData?.personalInfo?.phone,
+      resume.formData?.summary,
+      resume.formData?.skills,
+      resume.formData?.experience?.length > 0,
+      resume.formData?.education?.length > 0,
+      resume.formData?.projects?.length > 0
+    ];
+
+    const filled = fields.filter(Boolean).length;
+    return Math.round((filled / fields.length) * 100);
+  };
+
+  const totalResumes = resumes.length;
+
+  const averageCompletion =
+    totalResumes === 0
+      ? 0
+      : Math.round(
+          resumes.reduce((acc, resume) => acc + computeCompletion(resume), 0) /
+            totalResumes
+        );
+
+  const lastUpdated = resumes
+    .slice()
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
+
+  const MAX_COUNT_FOR_RING = 20;
+  const countProgress = Math.min(100, Math.round((totalResumes / MAX_COUNT_FOR_RING) * 100));
+
+  const DashboardStatCard = ({
+    title,
+    value,
+    suffix = "",
+    icon: Icon,
+    accentClass,
+    ringColor,
+    progress
+  }) => {
+    const displayValue = value ?? 'N/A';
+    const percent = typeof progress === 'number' ? Math.min(Math.max(progress, 0), 100) : 0;
+
+    return (
+      <div className="relative bg-slate-900/40 border border-white/10 rounded-3xl p-7 shadow-2xl shadow-black/30 backdrop-blur-xl hover:border-purple-500/60 transition">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1">
+            <p className="text-xs uppercase tracking-widest text-gray-400">{title}</p>
+            <p className="mt-2 text-4xl font-bold text-white leading-tight">
+              {typeof value === 'number' ? (
+                <AnimatedNumber value={value} suffix={suffix} />
+              ) : (
+                displayValue
+              )}
+            </p>
+          </div>
+
+          <div className="relative w-16 h-16">
+            <Ring value={percent} color={ringColor || '#a78bfa'} size={64} stroke={6} />
+            <div className={`absolute inset-0 flex items-center justify-center rounded-full ${accentClass} bg-opacity-25`}> 
+              <Icon className="w-6 h-6 text-white" />
+            </div>
+          </div>
+        </div>
+
+        <p className="mt-4 text-xs text-gray-400">{percent}%</p>
+      </div>
+    );
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-900 flex items-center justify-center">
@@ -91,9 +216,41 @@ export default function SavedResumes() {
       <Toaster position="top-center" />
 
       <div className="max-w-7xl mx-auto px-6 py-12">
-        <h1 className="text-5xl font-bold text-center text-white mb-6 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-           Saved Resumes
+        <h1 className="text-5xl font-bold text-center text-white mb-2 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+          Saved Resumes
         </h1>
+        {lastUpdated && (
+          <p className="text-center text-sm text-gray-300 mb-8">
+            Last updated: {new Date(lastUpdated.createdAt).toLocaleString('en-US', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            })}
+          </p>
+        )}
+
+        <div className="grid gap-6 sm:grid-cols-2 mb-10">
+          <DashboardStatCard
+            title="Total Resumes"
+            value={totalResumes}
+            icon={BarChart3}
+            accentClass="bg-gradient-to-br from-purple-500 to-indigo-500"
+            ringColor="#8b5cf6"
+            progress={countProgress}
+          />
+
+          <DashboardStatCard
+            title="Avg. Completion"
+            value={averageCompletion}
+            suffix="%"
+            icon={Target}
+            accentClass="bg-gradient-to-br from-emerald-500 to-teal-500"
+            ringColor="#34d399"
+            progress={averageCompletion}
+          />
+        </div>
 
         {/* ⭐ BACK BUTTON HERE */}
         <div className="flex justify-center mb-12">
