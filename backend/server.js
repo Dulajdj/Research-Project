@@ -2,10 +2,15 @@ import dotenv from 'dotenv'; // load environment variables
 import express from 'express';
 import cors from 'cors';
 import multer from 'multer';
+
 import signupRoute from './routes/signup/route.js'; 
 import loginRoute from './routes/login/route.js';
 import jobRoute from './routes/jobs/route.js'; 
 import applicationRoute from './routes/applications/route.js';
+
+import connectDB from './config/db.js';
+import interviewRoutes from "./routes/interviewRoutes.js";
+
 
 // prefer .env.local for development (Next.js convention); fall back to .env
 dotenv.config({ path: '.env.local' });
@@ -18,6 +23,9 @@ app.use(express.json());
 
 // multer configuration to handle form-data uploads (in-memory storage)
 const upload = multer({ storage: multer.memoryStorage() }); //
+
+// Routes
+app.use("/api/interview", interviewRoutes);
 
 // import API handlers from previous Next.js code
 import {
@@ -37,7 +45,6 @@ app.get('/', (req, res) => {
 });
 
 // health check that also verifies DB connectivity (optional)
-import connectDB from './config/db.js';
 app.get('/health', async (req, res) => {
   try {
     await connectDB();
@@ -165,7 +172,16 @@ app.delete('/api/cover-letter', async (req, res) => {
   }
 });
 
-// end API routes
+// read port from environment so we can run on 3001 when needed
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 5000;
 
-const PORT = 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// connect database before starting server
+connectDB()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error("❌ Failed to connect database:", err);
+  });

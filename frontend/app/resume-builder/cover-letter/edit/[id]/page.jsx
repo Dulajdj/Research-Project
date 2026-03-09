@@ -174,7 +174,7 @@ export default function EditCoverLetterPage({ params }) {
   if (!letterData) return null;
 
   const handleDownloadPDF = async () => {
-    // 1. Loading state on කරන්න 
+    // 1. Loading state 
     // setIsGenerating(true); 
 
     try {
