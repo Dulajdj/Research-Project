@@ -26,7 +26,7 @@ export default function ApplyForJob() {
   useEffect(() => {
     const fetchJobDetails = async () => {
       try {
-        const res = await fetch(`http://localhost:5001/api/jobs/${params.id}`);
+        const res = await fetch(`http://localhost:5000/api/jobs/${params.id}`);
         const data = await res.json();
         if (data.success) setJob(data.data);
       } catch (error) {
@@ -59,7 +59,7 @@ export default function ApplyForJob() {
     formData.append("requiredSkills", job.requiredSkills || ""); 
 
     try {
-      const res = await fetch('http://localhost:5001/api/applications', {
+      const res = await fetch('http://localhost:5000/api/applications', {
         method: 'POST',
         body: formData
       });

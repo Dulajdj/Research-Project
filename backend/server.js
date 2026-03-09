@@ -167,5 +167,5 @@ app.delete('/api/cover-letter', async (req, res) => {
 
 // end API routes
 
-const PORT = 5001;
+const PORT = 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
