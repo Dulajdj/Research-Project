@@ -54,10 +54,13 @@ export default function AssessmentScreen() {
   const [answerStatus, setAnswerStatus] = useState(null);
   const [isQuizCompleted, setIsQuizCompleted] = useState(false);
   const [textAnswer, setTextAnswer] = useState("");
+
   const [confIndex, setConfIndex] = useState(0);
   const [confScore, setConfScore] = useState(0);
+  const [confFeedback, setConfFeedback] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
   const [transcript, setTranscript] = useState("");
+  const [interimTranscript, setInterimTranscript] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState(null);
@@ -71,23 +74,75 @@ export default function AssessmentScreen() {
     ) {
       const SpeechRecognition =
         window.SpeechRecognition || window.webkitSpeechRecognition;
-      recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = true;
-      recognitionRef.current.interimResults = true;
-      recognitionRef.current.onresult = (event) => {
-        let interimTranscript = "";
+      const recognition = new SpeechRecognition();
+
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = "en-US";
+
+      recognition.onresult = (event) => {
+        let currentInterim = "";
+        let finalAppended = "";
+
         for (let i = event.resultIndex; i < event.results.length; ++i) {
           if (event.results[i].isFinal) {
-            setTranscript(
-              (prev) => prev + " " + event.results[i][0].transcript,
-            );
+            finalAppended += event.results[i][0].transcript + " ";
           } else {
-            interimTranscript += event.results[i][0].transcript;
+            currentInterim += event.results[i][0].transcript;
           }
         }
+
+        if (finalAppended) {
+          setTranscript((prev) => prev + finalAppended);
+        }
+        setInterimTranscript(currentInterim);
       };
+
+      // FIXED: Safely handling the 'no-speech' event without crashing the React UI
+      recognition.onerror = (event) => {
+        if (event.error === "not-allowed") {
+          alert(
+            "Microphone access denied! Please check your URL bar settings.",
+          );
+        } else if (event.error === "no-speech") {
+          // Use console.log instead of console.error to avoid the red screen
+          console.log("🎤 No speech detected. Microphone turned off.");
+        } else {
+          console.log("🎤 Speech Recognition Log:", event.error);
+        }
+        setIsRecording(false);
+      };
+
+      recognition.onend = () => {
+        setIsRecording(false);
+        setInterimTranscript("");
+      };
+
+      recognitionRef.current = recognition;
     }
   }, []);
+
+  const toggleRecording = () => {
+    if (!recognitionRef.current) {
+      return alert(
+        "Speech recognition is not supported in this browser. Please use Google Chrome.",
+      );
+    }
+
+    if (isRecording) {
+      recognitionRef.current.stop();
+      setIsRecording(false);
+    } else {
+      setTranscript("");
+      setInterimTranscript("");
+      try {
+        recognitionRef.current.start();
+        setIsRecording(true);
+      } catch (error) {
+        console.log("Error starting mic:", error);
+      }
+    }
+  };
 
   const handleGenerateQuiz = async () => {
     const finalTopicList = [...selectedSkills];
@@ -111,32 +166,40 @@ export default function AssessmentScreen() {
       try {
         data = await response.json();
       } catch (parseErr) {
-        throw new Error(
-          "Server returned an invalid or HTML response instead of JSON.",
-        );
+        throw new Error("Server returned an invalid response.");
       }
 
       if (!response.ok) {
-        throw new Error(
-          data.details || data.error || `HTTP Error ${response.status}`,
-        );
+        // Use an alert instead of throwing an unhandled error to prevent the red screen
+        alert(`Failed to generate: ${data.details || data.error}`);
+        return;
       }
 
       if (data && data.questions) {
         setQuizData(data.questions);
         setView("quiz");
       } else {
-        throw new Error("AI did not return the 'questions' array properly.");
+        alert("AI did not return questions properly. Please try again.");
       }
     } catch (error) {
-      console.error("Quiz Generation Error:", error);
-      alert(`Error generating assessment:\n\n${error.message}`);
+      console.log("Quiz Generation Error:", error);
+      alert(
+        `Network Error: Ensure your backend server is running on port 5000.`,
+      );
     } finally {
       setIsGeneratingQuiz(false);
     }
   };
 
   const handleAnalyzeResponse = async () => {
+    const fullText = transcript + " " + interimTranscript;
+
+    if (fullText.trim().length < 10) {
+      return alert(
+        "Please speak a little more so the AI can accurately analyze your confidence.",
+      );
+    }
+
     setIsProcessing(true);
     try {
       const response = await fetch(
@@ -146,18 +209,14 @@ export default function AssessmentScreen() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             scenario: CONFIDENCE_SCENARIOS[confIndex],
-            answer: transcript,
+            answer: fullText,
           }),
         },
       );
       const data = await response.json();
+
       setConfScore((prev) => prev + (data.score || 70));
-      if (confIndex < CONFIDENCE_SCENARIOS.length - 1) {
-        setConfIndex((prev) => prev + 1);
-        setTranscript("");
-      } else {
-        setView("final_results");
-      }
+      setConfFeedback(data.feedback);
     } catch (error) {
       alert("Error analyzing response.");
     } finally {
@@ -165,12 +224,23 @@ export default function AssessmentScreen() {
     }
   };
 
+  const handleNextScenario = () => {
+    setConfFeedback(null);
+    setTranscript("");
+    setInterimTranscript("");
+
+    if (confIndex < CONFIDENCE_SCENARIOS.length - 1) {
+      setConfIndex((prev) => prev + 1);
+    } else {
+      setView("final_results");
+    }
+  };
+
   const handleSaveResult = async () => {
     setIsSaving(true);
-    const finalQuizScore =
-      isQuizCompleted && quizData.length > 0
-        ? (quizScore / quizData.length) * 100
-        : 0;
+    const finalQuizScore = isQuizCompleted
+      ? Math.min(100, Math.round(quizScore))
+      : 0;
     const finalConfScore = Math.round(confScore / CONFIDENCE_SCENARIOS.length);
 
     try {
@@ -209,7 +279,7 @@ export default function AssessmentScreen() {
     const isCorrect =
       optionIndex === quizData[currentQuizIndex].correctAnswerIndex;
     setAnswerStatus(isCorrect ? "correct" : "wrong");
-    if (isCorrect) setQuizScore((prev) => prev + 1);
+    if (isCorrect) setQuizScore((prev) => prev + 4.4);
     setShowExplanation(true);
   };
 
@@ -217,7 +287,7 @@ export default function AssessmentScreen() {
     if (textAnswer.trim().length < 5)
       return alert("Please provide a longer answer.");
     setAnswerStatus("answered");
-    setQuizScore((prev) => prev + 1);
+    setQuizScore((prev) => prev + 8.0);
     setShowExplanation(true);
   };
 
@@ -230,19 +300,6 @@ export default function AssessmentScreen() {
     } else {
       setIsQuizCompleted(true);
       setView("quiz_summary");
-    }
-  };
-
-  const toggleRecording = () => {
-    if (!recognitionRef.current)
-      return alert("Speech recognition not supported in this browser.");
-    if (isRecording) {
-      recognitionRef.current.stop();
-      setIsRecording(false);
-    } else {
-      setTranscript("");
-      recognitionRef.current.start();
-      setIsRecording(true);
     }
   };
 
@@ -328,13 +385,13 @@ export default function AssessmentScreen() {
                   type="text"
                   value={customTopic}
                   onChange={(e) => setCustomTopic(e.target.value)}
-                  className="w-full bg-black/30 border border-white/10 rounded-xl p-4 mb-6 outline-none"
+                  className="w-full bg-black/30 border border-white/10 rounded-xl p-4 mb-6 outline-none text-white"
                   placeholder="Ex: Rust, Go, Docker..."
                 />
                 <button
                   onClick={handleGenerateQuiz}
                   disabled={isGeneratingQuiz}
-                  className="w-full py-4 rounded-xl bg-purple-600 hover:bg-purple-500 font-bold flex items-center justify-center gap-2"
+                  className="w-full py-4 rounded-xl bg-purple-600 hover:bg-purple-500 font-bold flex items-center justify-center gap-2 text-white"
                 >
                   {isGeneratingQuiz ? (
                     <>
@@ -342,7 +399,7 @@ export default function AssessmentScreen() {
                       Assessment...
                     </>
                   ) : (
-                    "Generate 17 Questions"
+                    "Generate Questions"
                   )}
                 </button>
               </div>
@@ -382,7 +439,7 @@ export default function AssessmentScreen() {
                             answerStatus === null && handleQuizAnswer(idx)
                           }
                           disabled={answerStatus !== null}
-                          className={`w-full text-left p-4 rounded-xl border transition-all ${btnClass}`}
+                          className={`w-full text-left p-4 rounded-xl border transition-all text-white ${btnClass}`}
                         >
                           {opt}
                         </button>
@@ -394,13 +451,13 @@ export default function AssessmentScreen() {
                         value={textAnswer}
                         onChange={(e) => setTextAnswer(e.target.value)}
                         disabled={answerStatus !== null}
-                        className="w-full bg-black/30 border border-white/10 rounded-xl p-4 h-32 outline-none"
+                        className="w-full bg-black/30 border border-white/10 rounded-xl p-4 h-32 outline-none text-white"
                         placeholder="Type your answer here..."
                       />
                       {answerStatus === null && (
                         <button
                           onClick={handleTextSubmit}
-                          className="self-end px-6 py-3 bg-purple-600 rounded-xl font-bold"
+                          className="self-end px-6 py-3 bg-purple-600 rounded-xl font-bold text-white"
                         >
                           Submit
                         </button>
@@ -442,12 +499,12 @@ export default function AssessmentScreen() {
                 <h2 className="text-3xl font-bold mb-2">
                   Assessment Completed!
                 </h2>
-                <div className="text-4xl font-bold mt-4 mb-8">
-                  {Math.round((quizScore / quizData.length) * 100)}%
+                <div className="text-4xl font-bold mt-4 mb-8 text-white">
+                  {Math.min(100, Math.round(quizScore))}%
                 </div>
                 <button
                   onClick={() => setView("menu")}
-                  className="w-full py-4 rounded-xl bg-purple-600 font-bold"
+                  className="w-full py-4 rounded-xl bg-purple-600 font-bold text-white"
                 >
                   Back to Main Menu
                 </button>
@@ -460,9 +517,13 @@ export default function AssessmentScreen() {
               <h2 className="text-3xl font-bold mb-4">
                 Phase 2: Confidence Check
               </h2>
+              <p className="text-gray-400 max-w-lg mb-8">
+                Click the microphone to start. We will show your text in
+                real-time as you speak!
+              </p>
               <button
                 onClick={() => setView("confidence")}
-                className="bg-cyan-500 px-8 py-3 rounded-full font-bold mt-4"
+                className="bg-cyan-500 px-8 py-3 rounded-full font-bold mt-4 text-white"
               >
                 Start Scenarios
               </button>
@@ -475,36 +536,90 @@ export default function AssessmentScreen() {
                 <span className="inline-block px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-400 mb-4">
                   Scenario {confIndex + 1} of {CONFIDENCE_SCENARIOS.length}
                 </span>
-                <h2 className="text-2xl font-bold mb-6">
+                <h2 className="text-2xl font-bold mb-6 text-white">
                   "{CONFIDENCE_SCENARIOS[confIndex]}"
                 </h2>
-                <div className="flex flex-col items-center space-y-6">
-                  {!isProcessing ? (
+
+                {confFeedback ? (
+                  <div className="flex flex-col items-center space-y-6 animate-in fade-in zoom-in">
+                    <div className="w-full bg-cyan-900/20 border border-cyan-500/50 rounded-xl p-6 text-left">
+                      <h3 className="text-xl font-bold text-cyan-300 mb-2 flex items-center gap-2">
+                        <Brain className="w-6 h-6" /> AI Confidence Analysis
+                      </h3>
+                      <p className="text-gray-200 text-lg leading-relaxed">
+                        {confFeedback}
+                      </p>
+                    </div>
                     <button
-                      onClick={toggleRecording}
-                      className={`w-20 h-20 rounded-full flex items-center justify-center ${isRecording ? "bg-red-500 animate-pulse" : "bg-cyan-500"}`}
+                      onClick={handleNextScenario}
+                      className="bg-cyan-500 hover:bg-cyan-400 text-white px-8 py-3 rounded-full font-bold flex items-center gap-2 transition"
                     >
-                      {isRecording ? (
-                        <MicOff className="w-8 h-8" />
-                      ) : (
-                        <Mic className="w-8 h-8" />
-                      )}
+                      {confIndex < CONFIDENCE_SCENARIOS.length - 1
+                        ? "Next Scenario"
+                        : "View Final Results"}
+                      <ArrowRight className="w-5 h-5" />
                     </button>
-                  ) : (
-                    <RefreshCw className="w-8 h-8 text-cyan-400 animate-spin" />
-                  )}
-                  <div className="w-full bg-black/30 rounded-xl p-4 min-h-[100px] text-gray-300 italic">
-                    {transcript || "Speak your answer..."}
                   </div>
-                  {transcript && !isRecording && !isProcessing && (
-                    <button
-                      onClick={handleAnalyzeResponse}
-                      className="bg-white text-cyan-600 px-8 py-3 rounded-full font-bold"
-                    >
-                      Analyze Answer
-                    </button>
-                  )}
-                </div>
+                ) : (
+                  <div className="flex flex-col items-center space-y-6">
+                    {!isProcessing ? (
+                      <button
+                        onClick={toggleRecording}
+                        className={`w-20 h-20 rounded-full flex items-center justify-center transition-all ${isRecording ? "bg-red-500 animate-pulse shadow-lg shadow-red-500/50" : "bg-cyan-500 hover:bg-cyan-400 hover:scale-105"}`}
+                      >
+                        {isRecording ? (
+                          <MicOff className="w-8 h-8 text-white" />
+                        ) : (
+                          <Mic className="w-8 h-8 text-white" />
+                        )}
+                      </button>
+                    ) : (
+                      <div className="flex flex-col items-center gap-3">
+                        <RefreshCw className="w-10 h-10 text-cyan-400 animate-spin" />
+                        <span className="text-cyan-400 font-medium animate-pulse">
+                          Analyzing tone & confidence...
+                        </span>
+                      </div>
+                    )}
+
+                    <div className="w-full bg-black/30 rounded-xl p-4 min-h-[120px] border border-white/10 text-left relative">
+                      {isRecording && (
+                        <div className="absolute top-2 right-4 flex gap-1 items-center">
+                          <div className="w-2 h-2 bg-red-500 rounded-full animate-ping"></div>
+                          <span className="text-red-400 text-xs font-bold">
+                            REC
+                          </span>
+                        </div>
+                      )}
+
+                      <p className="text-gray-200 text-lg leading-relaxed">
+                        {transcript}
+                        <span className="text-gray-400 italic">
+                          {interimTranscript}
+                        </span>
+                      </p>
+
+                      {!(transcript || interimTranscript) && (
+                        <p className="text-gray-500 italic text-center mt-6">
+                          {isProcessing
+                            ? "Sending audio transcript to AI..."
+                            : "Click the mic and speak your answer clearly. Text will appear here in real-time."}
+                        </p>
+                      )}
+                    </div>
+
+                    {(transcript || interimTranscript) &&
+                      !isRecording &&
+                      !isProcessing && (
+                        <button
+                          onClick={handleAnalyzeResponse}
+                          className="bg-white text-cyan-600 px-8 py-3 rounded-full font-bold hover:bg-gray-100 transition"
+                        >
+                          Analyze Answer
+                        </button>
+                      )}
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -517,14 +632,14 @@ export default function AssessmentScreen() {
                 <div className="flex justify-center gap-4 mt-8">
                   <button
                     onClick={() => window.location.reload()}
-                    className="px-6 py-3 rounded-full border border-white/20"
+                    className="px-6 py-3 rounded-full border border-white/20 text-white"
                   >
                     Start New
                   </button>
                   <button
                     onClick={handleSaveResult}
                     disabled={isSaving || saveStatus === "success"}
-                    className={`px-8 py-3 rounded-full font-bold flex items-center gap-2 ${saveStatus === "success" ? "bg-green-500" : "bg-purple-600"}`}
+                    className={`px-8 py-3 rounded-full font-bold flex items-center gap-2 text-white ${saveStatus === "success" ? "bg-green-500" : "bg-purple-600"}`}
                   >
                     {isSaving ? (
                       <Loader2 className="animate-spin" />
