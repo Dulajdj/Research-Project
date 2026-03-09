@@ -10,7 +10,7 @@ import applicationRoute from './routes/applications/route.js';
 
 import connectDB from './config/db.js';
 import interviewRoutes from "./routes/interviewRoutes.js";
-
+import aiRoutes from "./routes/aiRoutes.js";
 
 // prefer .env.local for development (Next.js convention); fall back to .env
 dotenv.config({ path: '.env.local' });
@@ -26,6 +26,7 @@ const upload = multer({ storage: multer.memoryStorage() }); //
 
 // Routes
 app.use("/api/interview", interviewRoutes);
+app.use("/api/ai", aiRoutes);
 
 // import API handlers from previous Next.js code
 import {
