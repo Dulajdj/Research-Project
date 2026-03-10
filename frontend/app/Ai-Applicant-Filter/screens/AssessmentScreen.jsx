@@ -13,6 +13,7 @@ import {
   ArrowRight,
   Save,
 } from "lucide-react";
+import Leaderboard from "./leaderboard"; // NEW IMPORT
 
 const styles = `
   .mic-wave { display: flex; align-items: center; justify-content: center; gap: 4px; height: 30px; }
@@ -92,20 +93,16 @@ export default function AssessmentScreen() {
           }
         }
 
-        if (finalAppended) {
-          setTranscript((prev) => prev + finalAppended);
-        }
+        if (finalAppended) setTranscript((prev) => prev + finalAppended);
         setInterimTranscript(currentInterim);
       };
 
-      // FIXED: Safely handling the 'no-speech' event without crashing the React UI
       recognition.onerror = (event) => {
         if (event.error === "not-allowed") {
           alert(
             "Microphone access denied! Please check your URL bar settings.",
           );
         } else if (event.error === "no-speech") {
-          // Use console.log instead of console.error to avoid the red screen
           console.log("🎤 No speech detected. Microphone turned off.");
         } else {
           console.log("🎤 Speech Recognition Log:", event.error);
@@ -123,11 +120,10 @@ export default function AssessmentScreen() {
   }, []);
 
   const toggleRecording = () => {
-    if (!recognitionRef.current) {
+    if (!recognitionRef.current)
       return alert(
         "Speech recognition is not supported in this browser. Please use Google Chrome.",
       );
-    }
 
     if (isRecording) {
       recognitionRef.current.stop();
@@ -170,7 +166,6 @@ export default function AssessmentScreen() {
       }
 
       if (!response.ok) {
-        // Use an alert instead of throwing an unhandled error to prevent the red screen
         alert(`Failed to generate: ${data.details || data.error}`);
         return;
       }
@@ -194,11 +189,10 @@ export default function AssessmentScreen() {
   const handleAnalyzeResponse = async () => {
     const fullText = transcript + " " + interimTranscript;
 
-    if (fullText.trim().length < 10) {
+    if (fullText.trim().length < 10)
       return alert(
         "Please speak a little more so the AI can accurately analyze your confidence.",
       );
-    }
 
     setIsProcessing(true);
     try {
@@ -309,8 +303,9 @@ export default function AssessmentScreen() {
       <div className="min-h-screen bg-slate-950 font-sans text-slate-100 pb-10">
         <div className="fixed inset-0 bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-black -z-10"></div>
 
+        {/* UPDATED NAVBAR WITH LEADERBOARD BUTTON */}
         <nav className="fixed w-full bg-slate-900/80 backdrop-blur-lg z-50 border-b border-white/10">
-          <div className="max-w-7xl mx-auto px-4 h-16 flex items-center">
+          <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
             <div
               className="flex items-center space-x-2 cursor-pointer"
               onClick={() => setView("menu")}
@@ -320,10 +315,23 @@ export default function AssessmentScreen() {
                 AI Career Guide
               </span>
             </div>
+
+            <button
+              onClick={() => setView("leaderboard")}
+              className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-white font-medium transition-all"
+            >
+              <Trophy className="w-4 h-4 text-yellow-400" />
+              Leaderboard
+            </button>
           </div>
         </nav>
 
-        <main className="pt-20">
+        <main className="pt-24">
+          {/* LEADERBOARD VIEW */}
+          {view === "leaderboard" && (
+            <Leaderboard onBack={() => setView("menu")} />
+          )}
+
           {view === "menu" && (
             <div className="flex flex-col items-center justify-center min-h-[80vh] px-4">
               <h1 className="text-4xl md:text-5xl font-bold text-white mb-12 text-center">
