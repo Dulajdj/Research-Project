@@ -11,6 +11,8 @@ import applicationRoute from './routes/applications/route.js';
 import connectDB from './config/db.js';
 import interviewRoutes from "./routes/interviewRoutes.js";
 
+
+
 // prefer .env.local for development (Next.js convention); fall back to .env
 dotenv.config({ path: '.env.local' });
 dotenv.config();
@@ -171,16 +173,6 @@ app.delete('/api/cover-letter', async (req, res) => {
   }
 });
 
-// read port from environment so we can run on 3001 when needed
-const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 5000;
+const PORT = 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
-// connect database before starting server
-connectDB()
-  .then(() => {
-    app.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${PORT}`);
-    });
-  })
-  .catch((err) => {
-    console.error("❌ Failed to connect database:", err);
-  });

@@ -15,7 +15,8 @@ import {
   FileText,
   X,
   GraduationCap,
-  Code2
+  Code2,
+  Map // NEW: Import Map icon for the button
 } from 'lucide-react';
 
 export default function ApplicantJobBoard() {
@@ -100,17 +101,29 @@ export default function ApplicantJobBoard() {
             Browse through hundreds of job opportunities tailored to your skills and experience.
           </p>
 
-          <div className="relative max-w-2xl mx-auto mt-8">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <Search className="h-5 w-5 text-gray-400" />
+          {/* NEW PART: SEARCH AND MAP BUTTON CONTAINER */}
+          <div className="flex flex-col md:flex-row items-center justify-center gap-4 mt-8">
+            <div className="relative w-full max-w-xl">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <Search className="h-5 w-5 text-gray-400" />
+              </div>
+              <input
+                type="text"
+                className="block w-full pl-11 pr-4 py-4 bg-slate-800/50 border border-white/10 rounded-full leading-5 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all backdrop-blur-sm"
+                placeholder="Search by Job Title, Company, or Skills..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
             </div>
-            <input
-              type="text"
-              className="block w-full pl-11 pr-4 py-4 bg-slate-800/50 border border-white/10 rounded-full leading-5 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all backdrop-blur-sm"
-              placeholder="Search by Job Title, Company, or Skills..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+
+            {/* NEW: VIEW HEATMAP BUTTON */}
+            <button 
+              onClick={() => router.push('/applicant/heatmap')}
+              className="flex items-center gap-2 px-6 py-4 bg-purple-600/20 border border-purple-500/40 rounded-full hover:bg-purple-600/30 transition-all group whitespace-nowrap"
+            >
+              <Map className="w-5 h-5 text-purple-400 group-hover:scale-110 transition-transform" />
+              <span className="font-semibold text-purple-100">View Job Map</span>
+            </button>
           </div>
         </div>
 
