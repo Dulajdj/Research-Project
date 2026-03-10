@@ -21,7 +21,7 @@ export default function RichTextEditor({ content, coverLetterId }) {
       }),
     ],
     content: content || "<p>Start writing your cover letter...</p>",
-    immediatelyRender: false, // ← මේක තමයි SSR error එක fix කරන්නේ!
+    immediatelyRender: false, 
     editorProps: {
       attributes: {
         class: "prose prose-lg max-w-none focus:outline-none min-h-96 p-6",
