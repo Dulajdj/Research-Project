@@ -15,6 +15,21 @@ import assessmentRoutes from "./routes/assessmentRoutes.js";
 
 import connectDB from "./config/db.js";
 
+// prefer .env.local for development (Next.js convention); fall back to .env
+dotenv.config({ path: '.env.local' });
+dotenv.config();
+
+const app = express();
+app.use(cors());
+// parse JSON bodies for most endpoints
+app.use(express.json());
+
+// multer configuration to handle form-data uploads (in-memory storage)
+const upload = multer({ storage: multer.memoryStorage() }); //
+
+// Routes
+app.use("/api/interview", interviewRoutes);
+
 // Import legacy API handlers
 import {
   handleCheckResumePOST,
