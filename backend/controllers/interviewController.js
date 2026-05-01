@@ -3,10 +3,6 @@ import Interview from "../models/Interview.js";
 import InterviewResult from "../models/InterviewResult.js";
 import { generatePDF } from "../utils/pdfGenerator.js";
 
-
-// =============================
-// INTERVIEW TYPE CONFIGURATIONS
-// =============================
 const interviewTypeConfigs = {
   "Structured": {
     questionStyle: `
@@ -18,7 +14,8 @@ const interviewTypeConfigs = {
 - NO follow-up style questions — each question must stand alone
 `,
     meetingStyle: "formal_structured",
-    aiGreetingExtra: "This is a formal structured interview. I will ask each question one by one in a fixed order."
+    aiGreetingExtra: "This is a formal structured interview. I will ask each question one by one in a fixed order.",
+    introStyle: "formal and professional. Ask them to state their full name, current or most recent role, total years of experience, and one key professional achievement — all in a structured, concise manner."
   },
   "Unstructured": {
     questionStyle: `
@@ -30,7 +27,8 @@ const interviewTypeConfigs = {
 - Mix personal, professional and hypothetical questions freely
 `,
     meetingStyle: "casual_conversational",
-    aiGreetingExtra: "This will be a relaxed, conversational interview. Feel free to speak openly and take your time."
+    aiGreetingExtra: "This will be a relaxed, conversational interview. Feel free to speak openly and take your time.",
+    introStyle: "warm, casual and conversational. Invite them to share whatever feels natural — their story, what drives them, what they enjoy outside of work, and what brought them here today."
   },
   "Panel": {
     questionStyle: `
@@ -41,7 +39,8 @@ const interviewTypeConfigs = {
 - Include at least one cross-functional question that requires multiple skills to answer
 `,
     meetingStyle: "panel_multi_perspective",
-    aiGreetingExtra: "You are being interviewed by a panel today. Questions will come from different interviewers including HR, a Technical Lead, and a Manager."
+    aiGreetingExtra: "You are being interviewed by a panel today. Questions will come from different interviewers including HR, a Technical Lead, and a Manager.",
+    introStyle: "addressed to the full panel. Ask the candidate to introduce themselves to everyone present — covering their background, their most relevant experience for this role, and what unique value they bring to a team."
   },
   "One-on-One": {
     questionStyle: `
@@ -52,7 +51,8 @@ const interviewTypeConfigs = {
 - Create a comfortable but professional tone throughout
 `,
     meetingStyle: "personal_direct",
-    aiGreetingExtra: "This is a personal one-on-one interview. We will have a direct and focused conversation today."
+    aiGreetingExtra: "This is a personal one-on-one interview. We will have a direct and focused conversation today.",
+    introStyle: "personal and direct. Ask them to walk you through their professional journey — focusing on what led them to this role, their biggest career highlight so far, and what they are looking for next."
   },
   "Competency-Based": {
     questionStyle: `
@@ -63,19 +63,20 @@ const interviewTypeConfigs = {
 - Questions should require the candidate to provide real past examples with measurable outcomes
 `,
     meetingStyle: "star_method",
-    aiGreetingExtra: "This is a competency-based interview. Please answer each question using the STAR method — describe the Situation, Task, Action you took, and the Result."
+    aiGreetingExtra: "This is a competency-based interview. Please answer each question using the STAR method — describe the Situation, Task, Action you took, and the Result.",
+    introStyle: "competency-focused. Ask them to introduce themselves by sharing one real professional example using the STAR method — a situation where they demonstrated a key strength relevant to this role."
   },
   "Stress Interview": {
     questionStyle: `
 - Questions must be intentionally challenging, pressured, and sometimes confrontational
 - Include rapid-fire questions that require quick thinking
-- Add hypothetical crisis scenarios: "Your system goes down 1 hour before launch — what do you do?"
-- Include questions that challenge the candidate's decisions: "Why should we hire you over someone with more experience?"
+- Add hypothetical crisis scenarios
+- Include questions that challenge the candidate's decisions
 - Add trick or unexpected questions to test composure under pressure
-- Include at least one question that seems impossible to answer correctly
 `,
     meetingStyle: "high_pressure",
-    aiGreetingExtra: "This is a stress interview designed to test how you perform under pressure. Expect challenging and direct questions. Stay calm and composed."
+    aiGreetingExtra: "This is a stress interview designed to test how you perform under pressure. Expect challenging and direct questions. Stay calm and composed.",
+    introStyle: "high-pressure and challenging. Give them a strict time limit (e.g. 45 seconds) and ask them to sell themselves — who they are, why they deserve this role, and why you should not just end this interview right now."
   },
   "Phone/Video Screening": {
     questionStyle: `
@@ -83,30 +84,30 @@ const interviewTypeConfigs = {
 - Focus on: availability, salary expectations, basic qualifications, location/remote preferences
 - Include quick skill-check questions (not deep technical — just surface level verification)
 - Questions should be answerable in 1-2 minutes each
-- Include at least one question about why they applied and what they know about the role
 - Keep it to essential screening criteria only — this is a first-round filter
 `,
     meetingStyle: "quick_screening",
-    aiGreetingExtra: "This is a quick screening call to check your basic qualifications and fit. Questions will be short and direct."
+    aiGreetingExtra: "This is a quick screening call to check your basic qualifications and fit. Questions will be short and direct.",
+    introStyle: "brief and screening-level. Ask for just their name, current situation (employed/looking), and in one or two sentences what kind of role they are seeking and why they applied."
   },
   "Group Interview": {
     questionStyle: `
 - Questions must be designed for group dynamics and collaboration assessment
-- Include scenario-based team challenges: "If you and your team disagreed on an approach, how would you handle it?"
+- Include scenario-based team challenges
 - Focus on: leadership emergence, conflict resolution, collaboration, communication in groups
-- Include questions about how the candidate behaves in team settings vs individually
-- Add role-play style questions: "Imagine you are leading a team of 5 people and one member is underperforming..."
 - Questions should reveal how the candidate competes AND cooperates simultaneously
 `,
     meetingStyle: "group_dynamics",
-    aiGreetingExtra: "This is a group interview format assessing your teamwork, leadership, and collaboration skills. Answer with group dynamics in mind."
+    aiGreetingExtra: "This is a group interview format assessing your teamwork, leadership, and collaboration skills. Answer with group dynamics in mind.",
+    introStyle: "group-oriented. Ask them to introduce themselves to the group — their background, their preferred role in a team, and one example of a successful group project they contributed to."
   }
 };
 
 const defaultConfig = {
   questionStyle: `- Mix behavioral and technical questions\n- Make questions progressively deeper\n- Include situational and role-specific questions`,
   meetingStyle: "standard",
-  aiGreetingExtra: ""
+  aiGreetingExtra: "",
+  introStyle: "professional. Ask them to introduce themselves — covering their background, relevant experience, and what motivated them to apply for this role."
 };
 
 const getConfigForTypes = (interviewTypes) => {
@@ -115,7 +116,8 @@ const getConfigForTypes = (interviewTypes) => {
   return {
     questionStyle: matchedConfigs.map(c => c.questionStyle).join("\n"),
     meetingStyle: matchedConfigs[0].meetingStyle,
-    aiGreetingExtra: matchedConfigs.map(c => c.aiGreetingExtra).filter(Boolean).join(" ")
+    aiGreetingExtra: matchedConfigs.map(c => c.aiGreetingExtra).filter(Boolean).join(" "),
+    introStyle: matchedConfigs.map(c => c.introStyle).join(" Also be ")
   };
 };
 
@@ -133,7 +135,8 @@ export const generateInterview = async (req, res) => {
 
     const config = getConfigForTypes(interviewTypes);
 
-    const prompt = `
+    // ── STEP 1: Generate interview questions ──────────────────────────────
+    const questionsPrompt = `
 You are a professional interview question generator. Generate exactly ${questionCount} interview questions.
 
 Job Role: ${jobRole}
@@ -153,20 +156,59 @@ ADDITIONAL RULES:
 Generate exactly ${questionCount} questions now:
 `;
 
-    const response = await axios.post(
+    const questionsResponse = await axios.post(
       "https://openrouter.ai/api/v1/chat/completions",
-      { model: "openai/gpt-3.5-turbo", messages: [{ role: "user", content: prompt }], temperature: 0.7 },
+      { model: "openai/gpt-3.5-turbo", messages: [{ role: "user", content: questionsPrompt }], temperature: 0.7 },
       { headers: { Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`, "Content-Type": "application/json" } }
     );
 
-    const content = response.data.choices[0].message.content;
+    const content = questionsResponse.data.choices[0].message.content;
     const questions = content.split("\n").map(q => q.replace(/^\d+[\).\s-]*/, "").trim()).filter(Boolean);
 
+    // ── STEP 2: Generate a UNIQUE intro prompt every single time ──────────
+    // temperature: 0.95 = high randomness = different output every time
+    // even if same job role and interview type is selected again
+    const introPromptRequest = `
+You are an AI interview host starting a ${interviewTypes.join(" + ")} interview for a ${jobRole} (${experienceLevel} level) position.
+
+Write a single, natural-sounding introduction request to ask the candidate to introduce themselves.
+The tone should be ${config.introStyle}
+
+STRICT RULES:
+- Write ONLY the spoken introduction request — no labels, no quotes, no extra text
+- It must be between 2 and 4 sentences long
+- Make it feel FRESH and DIFFERENT from a standard template — vary the wording, sentence structure, and specific things you ask about
+- Naturally reference the job role "${jobRole}" somewhere in the request
+- Do NOT start with "Hello", "Hi", "Welcome", or "Good" — jump straight into the request
+- The candidate should know exactly what to cover in their introduction
+
+Write the introduction request now:
+`;
+
+    const introResponse = await axios.post(
+      "https://openrouter.ai/api/v1/chat/completions",
+      {
+        model: "openai/gpt-3.5-turbo",
+        messages: [{ role: "user", content: introPromptRequest }],
+        temperature: 0.95
+      },
+      { headers: { Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`, "Content-Type": "application/json" } }
+    );
+
+    const generatedIntroPrompt = introResponse.data.choices[0].message.content.trim();
+    console.log("✅ Generated unique introPrompt:", generatedIntroPrompt);
+
+    // ── STEP 3: Save everything to DB ─────────────────────────────────────
     const interview = await Interview.create({
-      jobRole, experienceLevel, jobDescription, questionCount,
-      interviewTypes, questions,
+      jobRole,
+      experienceLevel,
+      jobDescription,
+      questionCount,
+      interviewTypes,
+      questions,
       meetingStyle: config.meetingStyle,
-      aiGreetingExtra: config.aiGreetingExtra
+      aiGreetingExtra: config.aiGreetingExtra,
+      introPrompt: generatedIntroPrompt  // ✅ unique per interview session
     });
 
     res.json(interview);
@@ -335,7 +377,7 @@ export const getDashboardStats = async (req, res) => {
 
 
 // =============================
-// ✅ PRACTICE MODE — GENERATE QUESTIONS
+// PRACTICE MODE — GENERATE QUESTIONS
 // =============================
 export const generatePracticeQuestions = async (req, res) => {
   try {
@@ -382,7 +424,7 @@ Rules:
 
 
 // =============================
-// ✅ PRACTICE MODE — SCORE ANSWERS
+// PRACTICE MODE — SCORE ANSWERS
 // =============================
 export const scorePracticeAnswers = async (req, res) => {
   try {
