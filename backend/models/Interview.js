@@ -31,14 +31,20 @@ const interviewSchema = new mongoose.Schema({
     }
   ],
 
-  // ✅ NEW: Stores the meeting style based on interview type selected
+  // Stores the meeting style based on interview type selected
   meetingStyle: {
     type: String,
     default: "standard"
   },
 
-  // ✅ NEW: Extra AI greeting instruction based on interview type
+  // Extra AI greeting instruction based on interview type
   aiGreetingExtra: {
+    type: String,
+    default: ""
+  },
+
+  // ✅ NEW: AI-generated unique intro prompt — different every time even for same interview type
+  introPrompt: {
     type: String,
     default: ""
   },
