@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Loader2, Sparkles, User, Building, ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { generateCoverLetter } from "../../../../actions/cover-letter";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 export default function CoverLetterCreatePage() {
   const router = useRouter();
@@ -74,12 +76,29 @@ export default function CoverLetterCreatePage() {
         
         {/* Title Section */}
         <div className="text-center mb-10">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">
-            Generate Your Cover Letter
-          </h1>
+          <h1 style={{
+              fontFamily:"'Sora',sans-serif",
+              fontSize:"clamp(2rem,5vw,3.6rem)",
+              fontWeight:800,letterSpacing:"-0.035em",lineHeight:1.08,
+              margin:"0 0 14px",
+              background:"linear-gradient(140deg,#ffffff 20%,#ddd6fe 55%,#a78bfa 100%)",
+              WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text",
+            }}>
+              Generate Your Cover Letter
+            </h1>
           <p className="text-gray-300 text-lg">
             Fill in the details below and let AI write the perfect letter for you.
           </p>
+        </div>
+                {/* --- Back Button Area  --- */}
+        <div className="flex justify-start mb-8">
+            <Link 
+                href="/resume-builder" 
+                className="flex items-center gap-2 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition-all"
+            >
+                <ArrowLeft size={20} /> 
+                Back to Dashboard
+            </Link>
         </div>
 
         {/* Glassmorphism Form Container */}

@@ -8,7 +8,7 @@ import TextAlign from "@tiptap/extension-text-align";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Bold, Italic, Underline as UnderlineIcon, AlignLeft, AlignCenter, AlignRight, Save } from "lucide-react";
-import { saveCoverLetter } from "../../../actions/cover-letter";
+import { saveCoverLetter } from "@/actions/cover-letter";
 import { toast } from "sonner";
 
 export default function RichTextEditor({ content, coverLetterId }) {
@@ -21,7 +21,7 @@ export default function RichTextEditor({ content, coverLetterId }) {
       }),
     ],
     content: content || "<p>Start writing your cover letter...</p>",
-    immediatelyRender: false, // ← මේක තමයි SSR error එක fix කරන්නේ!
+    immediatelyRender: false, 
     editorProps: {
       attributes: {
         class: "prose prose-lg max-w-none focus:outline-none min-h-96 p-6",

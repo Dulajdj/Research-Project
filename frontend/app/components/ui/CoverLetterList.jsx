@@ -1,14 +1,13 @@
 // components/ui/CoverLetterList.jsx
-"use client"; // ← මේක එකතු කරන්න!
+"use client"; 
 
 import Link from "next/link";
-import { Eye, Trash2 } from "lucide-react";
-import { Button } from "../ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { deleteCoverLetter } from "../../../actions/cover-letter";
-import { toast } from "react-hot-toast"; // fallback since sonner not installed
 import { format } from "date-fns";
-
+import { Eye, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { deleteCoverLetter } from "@/actions/cover-letter";
+import { toast } from "sonner";
 
 export default function CoverLetterList({ coverLetters }) {
   const handleDelete = async (id) => {

@@ -4,7 +4,8 @@ import React, { useState } from 'react';
 import { ArrowLeft, CheckCircle, AlertTriangle, TrendingUp, Target, FileText, Upload, Sparkles, Loader2, Download, Eye } from 'lucide-react';
 import Link from 'next/link';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
+// backend base URL; override with NEXT_PUBLIC_API_URL when available
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 export default function ResumeChecker() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -110,8 +111,15 @@ const analyzeResume = async () => {
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="text-center mb-8">
-            <h1 className="text-4xl sm:text-5xl font-bold text-white tracking-tight">
-              Resume <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">Checker</span>
+            <h1 style={{
+              fontFamily:"'Sora',sans-serif",
+              fontSize:"clamp(2rem,5vw,3.6rem)",
+              fontWeight:800,letterSpacing:"-0.035em",lineHeight:1.08,
+              margin:"0 0 14px",
+              background:"linear-gradient(140deg,#ffffff 20%,#ddd6fe 55%,#a78bfa 100%)",
+              WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text",
+            }}>
+              Resume Checker
             </h1>
             <p className="mt-4 text-lg text-gray-300">
               Analyze and optimize your resume for ATS compatibility and job applications
@@ -233,7 +241,7 @@ const analyzeResume = async () => {
                     {isAnalyzing ? (
                       <>
                         <Loader2 className="w-5 h-5 inline mr-2 animate-spin" />
-                        Analyzing with Gemini AI...
+                        Analyzing with AI...
                       </>
                     ) : (
                       <>
@@ -265,7 +273,7 @@ const analyzeResume = async () => {
                             <Target className="w-4 h-4 text-purple-400" />
                             Match Score
                         </h4>
-                        <p className="text-sm text-gray-300">Get a score based on real Gemini AI analysis</p>
+                        <p className="text-sm text-gray-300">Get a score based on real AI analysis</p>
                     </div>
                   </div>
                 </div>
@@ -379,7 +387,7 @@ const analyzeResume = async () => {
                   className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-4 rounded-2xl hover:shadow-lg transition text-center"
                 >
                   <Eye className="w-5 h-5 inline mr-2" />
-                  Edit with AI Builder
+                  Create New Resume 
                 </Link>
               </div>
             </div>
