@@ -75,7 +75,7 @@ export default function History() {
   }, []);
 
   const filters = ["All", "Excellent", "Good", "Average", "Needs Work"];
-
+  
   const getGrade = (score) => {
     if (score >= 80) return "Excellent";
     if (score >= 65) return "Good";
