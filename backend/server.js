@@ -3,34 +3,32 @@ import express from "express";
 import cors from "cors";
 import multer from "multer";
 
-// Existing Routes
+// Load environment variables
+dotenv.config({ path: ".env.local" });
+dotenv.config();
+
+// Initialize app (ONLY ONCE)
+const app = express();
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+
+// Multer configuration (ONLY ONCE)
+const upload = multer({ storage: multer.memoryStorage() });
+
+// DB connection
+import connectDB from "./config/db.js";
+
+// Routes
 import signupRoute from "./routes/signup/route.js";
 import loginRoute from "./routes/login/route.js";
 import jobRoute from "./routes/jobs/route.js";
 import applicationRoute from "./routes/applications/route.js";
 import interviewRoutes from "./routes/interviewRoutes.js";
-
-// NEW: Assessment Routes
 import assessmentRoutes from "./routes/assessmentRoutes.js";
 
-import connectDB from "./config/db.js";
-
-// prefer .env.local for development (Next.js convention); fall back to .env
-dotenv.config({ path: '.env.local' });
-dotenv.config();
-
-const app = express();
-app.use(cors());
-// parse JSON bodies for most endpoints
-app.use(express.json());
-
-// multer configuration to handle form-data uploads (in-memory storage)
-const upload = multer({ storage: multer.memoryStorage() }); //
-
-// Routes
-app.use("/api/interview", interviewRoutes);
-
-// Import legacy API handlers
+// Legacy API handlers
 import {
   handleCheckResumePOST,
   handleParseResumePOST,
@@ -50,64 +48,59 @@ import {
   deleteCoverLetter,
 } from "./actions/cover-letter.js";
 
-// Environment Config
-dotenv.config({ path: ".env.local" });
-dotenv.config();
+// ---------------- ROUTES ----------------
 
-const app = express();
-app.use(cors());
-app.use(express.json());
-
-// Multer configuration to handle form-data uploads (in-memory storage)
-const upload = multer({ storage: multer.memoryStorage() });
-
-// --- Route Registration ---
-
-// Modules
+// Basic routes
 app.use("/api/interview", interviewRoutes);
 app.use("/api/auth", signupRoute);
 app.use("/api/auth", loginRoute);
 app.use("/api/jobs", upload.single("file"), jobRoute);
 app.use("/api/applications", upload.single("cv"), applicationRoute);
 
-// NEW: Assessment Feature (Quiz generation & Confidence check)
+// Assessment feature
 app.use("/api/assessment", assessmentRoutes);
 
-// Helper to adapt Express request to handler format
+// ---------------- HELPERS ----------------
+
 function makeNextReq(req) {
   return {
     url: `${req.protocol}://${req.get("host")}${req.originalUrl}`,
     json: () => Promise.resolve(req.body),
     formData: async () => {
       const fd = new Map();
+
       for (const [k, v] of Object.entries(req.body || {})) {
         fd.set(k, v);
       }
+
       if (req.file) {
         const f = req.file;
         const buf = f.buffer;
+
         const ab = buf.buffer.slice(
           buf.byteOffset,
-          buf.byteOffset + buf.byteLength,
+          buf.byteOffset + buf.byteLength
         );
+
         fd.set("file", {
           arrayBuffer: async () => ab,
           type: f.mimetype,
           name: f.originalname,
         });
       }
+
       return fd;
     },
   };
 }
 
-// --- Legacy & Specific Endpoints ---
+// ---------------- BASIC ENDPOINTS ----------------
 
-app.get("/", (req, res) =>
-  res.json({ status: "success", message: "Server is running" }),
-);
+app.get("/", (req, res) => {
+  res.json({ status: "success", message: "Server is running" });
+});
 
-// Health check verified by DB connectivity
+// Health check
 app.get("/health", async (req, res) => {
   try {
     await connectDB();
@@ -116,6 +109,8 @@ app.get("/health", async (req, res) => {
     res.status(500).json({ status: "error", db: err.message });
   }
 });
+
+// ---------------- RESUME ----------------
 
 app.post("/api/check-resume", upload.single("file"), async (req, res) => {
   const result = await handleCheckResumePOST(makeNextReq(req));
@@ -137,7 +132,8 @@ app.post("/api/generate-summary", async (req, res) => {
   res.status(result.status || 200).json(result.body);
 });
 
-// Resume CRUD
+// ---------------- RESUME CRUD ----------------
+
 app.get("/api/resume", async (req, res) => {
   const result = await handleResumeGET(makeNextReq(req));
   res.status(result.status || 200).json(result.body);
@@ -158,11 +154,16 @@ app.delete("/api/resume", async (req, res) => {
   res.status(result.status || 200).json(result.body);
 });
 
-// Cover Letter actions
+// ---------------- COVER LETTER ----------------
+
 app.get("/api/cover-letter", async (req, res) => {
   const { id } = req.query;
+
   try {
-    if (id) return res.json(await getCoverLetter(id));
+    if (id) {
+      return res.json(await getCoverLetter(id));
+    }
+
     const data = await getCoverLetters();
     res.json(data);
   } catch (err) {
@@ -173,8 +174,8 @@ app.get("/api/cover-letter", async (req, res) => {
 app.post("/api/cover-letter", async (req, res) => {
   try {
     const { id, content } = req.body;
-    const r = await saveCoverLetter(id, content);
-    res.json(r);
+    const result = await saveCoverLetter(id, content);
+    res.json(result);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -190,11 +191,16 @@ app.delete("/api/cover-letter", async (req, res) => {
   }
 });
 
-// Server Start
+// ---------------- START SERVER ----------------
+
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 5000;
 
 connectDB()
   .then(() => {
-    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+    app.listen(PORT, () =>
+      console.log(`🚀 Server running on port ${PORT}`)
+    );
   })
-  .catch((err) => console.error("❌ DB connection failed:", err));
+  .catch((err) => {
+    console.error("❌ DB connection failed:", err);
+  });
