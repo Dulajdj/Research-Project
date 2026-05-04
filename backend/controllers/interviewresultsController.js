@@ -182,6 +182,35 @@ Example format:
       meetingStyle: config.meetingStyle,
       aiGreetingExtra: config.aiGreetingExtra
     });
+     // ── STEP 2: Generate a UNIQUE intro prompt every single time ──────────
+    const introPromptRequest = `
+You are an AI interview host starting a ${interviewTypes.join(" + ")} interview for a ${jobRole} (${experienceLevel} level) position.
+
+Write a single, natural-sounding introduction request to ask the candidate to introduce themselves.
+The tone should be ${config.introStyle}
+
+STRICT RULES:
+- Write ONLY the spoken introduction request — no labels, no quotes, no extra text
+- It must be between 2 and 4 sentences long
+- Make it feel FRESH and DIFFERENT from a standard template — vary the wording, sentence structure, and specific things you ask about
+- Naturally reference the job role "${jobRole}" somewhere in the request
+- Do NOT start with "Hello", "Hi", "Welcome", or "Good" — jump straight into the request
+- The candidate should know exactly what to cover in their introduction
+
+Write the introduction request now:
+`;
+
+    const introResponse = await axios.post(
+      {
+        messages: [{ role: "user", content: introPromptRequest }],
+        temperature: 0.95
+      },
+      { headers: { Authorization: `Bearer ${process.env.HF_API_KEY}`, "Content-Type": "application/json" } }
+    );
+
+    const generatedIntroPrompt = introResponse.data.choices[0].message.content.trim();
+    console.log("✅ Generated unique introPrompt:", generatedIntroPrompt);
+
 
     console.log("✅ HF: Generated", questions.length, "questions");
     res.json(interview);

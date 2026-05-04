@@ -94,7 +94,6 @@ const meetingStyleConfigs = {
       "Thank you for your response. Next:",
       "Moving on to the next standardized question."
     ],
-    introPrompt: "Please introduce yourself briefly. Include your name, current role, and years of experience.",
     completionMessage: "Thank you. You have completed all structured interview questions. Your responses have been recorded."
   },
   casual_conversational: {
@@ -107,7 +106,6 @@ const meetingStyleConfigs = {
       "That's good to hear. So tell me more about...",
       "Thanks for opening up about that. Let's move on."
     ],
-    introPrompt: "Hey! Feel free to tell me about yourself in whatever way feels natural to you — your background, passions, what drives you professionally, anything you'd like to share.",
     completionMessage: "That was a wonderful conversation! Thank you so much for sharing. We've covered everything we need."
   },
   panel_multi_perspective: {
@@ -120,7 +118,6 @@ const meetingStyleConfigs = {
       "Thank you for that. The panel has another question.",
       "Noted by the panel. Next question coming from a different perspective."
     ],
-    introPrompt: "Please introduce yourself to the panel. Tell us your professional background, your key achievements, and why you are interested in this role.",
     completionMessage: "The panel has completed all questions. Thank you for your time today. We will be in touch with next steps."
   },
   personal_direct: {
@@ -133,7 +130,6 @@ const meetingStyleConfigs = {
       "Good. Let's continue.",
       "Noted. Next one for you."
     ],
-    introPrompt: "Please introduce yourself. Tell me about your background, experience, and what motivates you professionally.",
     completionMessage: "Excellent! You've completed all the questions. Thank you for your time. Please click generate report to see your results."
   },
   star_method: {
@@ -146,7 +142,6 @@ const meetingStyleConfigs = {
       "Good. Next question — please use Situation, Task, Action, Result format.",
       "Thank you. Here's your next competency-based question."
     ],
-    introPrompt: "Please introduce yourself and describe one key professional achievement using the STAR method — the Situation, Task you faced, Action you took, and the Result you achieved.",
     completionMessage: "Well done! You have completed all competency-based questions. Your STAR method responses have been recorded for evaluation."
   },
   high_pressure: {
@@ -159,7 +154,6 @@ const meetingStyleConfigs = {
       "Good. Let's keep the pressure up. Next question.",
       "Quick answer required. Next:"
     ],
-    introPrompt: "You have 60 seconds. Tell me who you are, why you're here, and why we should not just end this interview right now.",
     completionMessage: "Interview complete. You've faced all the pressure questions. Let's see how you held up — click generate report."
   },
   quick_screening: {
@@ -172,7 +166,6 @@ const meetingStyleConfigs = {
       "Good. Let's keep it moving.",
       "Understood. Next."
     ],
-    introPrompt: "Briefly introduce yourself — just your name, current situation, and what kind of role you're looking for.",
     completionMessage: "Great, that covers everything for this screening call. Thank you for your time. We'll be in touch if you move to the next round."
   },
   group_dynamics: {
@@ -185,7 +178,6 @@ const meetingStyleConfigs = {
       "Good. Here's your next group dynamics question.",
       "Noted. Let's explore another team situation."
     ],
-    introPrompt: "Please introduce yourself to the group. Tell us your name, your background, and one example of a successful team project you contributed to.",
     completionMessage: "Excellent! You've completed all the group interview scenarios. Thank you for demonstrating your teamwork and leadership qualities."
   },
   standard: {
@@ -198,7 +190,6 @@ const meetingStyleConfigs = {
       "Good. Let's continue.",
       "Noted. Next one for you."
     ],
-    introPrompt: "Please introduce yourself. Tell me about your background, experience, and what motivates you professionally.",
     completionMessage: "Excellent! You've completed all the questions. Thank you for your time. Please click generate report to see your results."
   }
 };
@@ -282,23 +273,29 @@ export default function ScheduledInterview() {
   };
 
   // ===================== FETCH QUESTIONS =====================
-  useEffect(() => {
-    if (!interviewId) return;
-    axios
-      .get(`http://localhost:5000/api/interview/${interviewId}`)
-      .then((res) => {
-        setQuestions(res.data.questions);
+ // REPLACE WITH:
+useEffect(() => {
+  if (!interviewId) return;
+  axios
+    .get(`http://localhost:5000/api/interview/${interviewId}`)
+    .then((res) => {
+      setQuestions(res.data.questions);
 
-        const style = res.data.meetingStyle || "standard";
-        const config = getMeetingConfig(style);
-        setMeetingConfig(config);
-        setInterviewTypeLabel(config.label);
+      const style = res.data.meetingStyle || "standard";
+      const config = getMeetingConfig(style);
 
-        if (res.data.interviewTypes?.length > 0) {
-          setInterviewTypeLabel(res.data.interviewTypes.join(" + ") + " Interview");
-        }
-      });
-  }, [interviewId]);
+      if (res.data.introPrompt) {
+        config.introPrompt = res.data.introPrompt;
+      }
+
+      setMeetingConfig(config);
+      setInterviewTypeLabel(config.label);
+
+      if (res.data.interviewTypes?.length > 0) {
+        setInterviewTypeLabel(res.data.interviewTypes.join(" + ") + " Interview");
+      }
+    });
+}, [interviewId]);
 
   // ===================== AI SPEAK =====================
   // Uses voiceSpeed and voiceGender from settings
