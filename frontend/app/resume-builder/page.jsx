@@ -572,9 +572,6 @@ export default function ResumeBuilderMain() {
 
           {/* ── Hero ── */}
           <div className="db-f2" style={{ textAlign:'center',marginBottom:52 }}>
-            <div style={{ display:'inline-flex',alignItems:'center',gap:7,padding:'4px 14px',borderRadius:99,fontSize:12,fontWeight:600,background:'rgba(139,92,246,.15)',border:'1px solid rgba(139,92,246,.28)',color:'#c4b5fd',marginBottom:18,letterSpacing:'.04em',textTransform:'uppercase',fontFamily:"'DM Sans',sans-serif" }}>
-              <Brain size={13} style={{ color:'#fbbf24' }} /> AI-Powered Career Tools
-            </div>
             <h1 style={{
               fontFamily:"'Sora',sans-serif",
               fontSize:'clamp(2rem,5vw,3.6rem)',fontWeight:800,
