@@ -2,8 +2,9 @@
 
 import React, { Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import Link from 'next/link'; 
 import { 
-  BookOpen, ExternalLink, ArrowLeft, PlayCircle, GraduationCap, MonitorPlay
+  BookOpen, ArrowLeft, GraduationCap, ArrowRight
 } from 'lucide-react';
 
 // Wrapper component to handle Suspense (Required for useSearchParams)
@@ -21,7 +22,9 @@ function RecommendationsContent() {
   
   // Get skills from URL (e.g., ?skills=react,python)
   const skillsString = searchParams.get('skills');
-  const skills = skillsString ? skillsString.split(',') : [];
+  
+  // FIX: Added .filter(Boolean) to ensure no empty boxes appear if there's a trailing comma
+  const skills = skillsString ? skillsString.split(',').filter(Boolean) : [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white font-sans">
@@ -52,7 +55,7 @@ function RecommendationsContent() {
             Upskill to <span className="text-purple-400">Get Hired</span>
           </h2>
           <p className="text-gray-400 max-w-2xl mx-auto text-lg">
-            We identified the following gaps in your profile. Complete these recommended courses to increase your chances of getting hired.
+            We identified the following gaps in your profile. Complete these guided learning paths to master the required skills.
           </p>
         </div>
 
@@ -65,80 +68,45 @@ function RecommendationsContent() {
             </button>
           </div>
         ) : (
-          <div className="grid gap-10">
-            {skills.map((skill, index) => (
-              <div 
-                key={index} 
-                className="bg-slate-800/40 backdrop-blur-md border border-white/10 rounded-3xl p-6 md:p-8 shadow-xl"
-              >
-                {/* Skill Header */}
-                <div className="flex items-center gap-3 mb-6 border-b border-white/5 pb-4">
-                  <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center text-purple-300">
-                    <BookOpen className="w-6 h-6" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {skills.map((skill) => {
+              // FIX: Creates a clean URL slug (e.g., "Machine Learning" becomes "machine-learning")
+              const skillSlug = skill.toLowerCase().trim().replace(/\s+/g, '-');
+
+              return (
+                // FIX: Used key={skill} instead of index for better React rendering performance
+                <div 
+                  key={skill} 
+                  className="bg-slate-800/40 backdrop-blur-md border border-white/10 hover:border-purple-500/50 rounded-3xl p-6 md:p-8 shadow-xl transition-all hover:-translate-y-1 hover:shadow-purple-500/20 flex flex-col h-full"
+                >
+                  {/* Skill Header */}
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-14 h-14 shrink-0 rounded-2xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30 flex items-center justify-center text-purple-300">
+                      <BookOpen className="w-7 h-7" />
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-bold text-white capitalize">{skill}</h3>
+                      <span className="text-xs font-medium px-2 py-1 bg-slate-700/50 text-purple-300 rounded-md mt-1 inline-block">
+                        Required Skill
+                      </span>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-2xl font-bold text-white capitalize">{skill}</h3>
-                    <p className="text-sm text-gray-400">Recommended learning resources for {skill}</p>
-                  </div>
+
+                  <p className="text-sm text-gray-400 mb-8 flex-grow">
+                    Step-by-step guided learning path to master {skill}. Includes curated resources from YouTube, Udemy, and Coursera with progress tracking.
+                  </p>
+
+                  {/* Link to the new dynamic Roadmap page */}
+                  <Link 
+                    href={`/applicant/courses/${skillSlug}`}
+                    className="group flex items-center justify-center gap-2 w-full bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-pink-500 text-white px-6 py-3 rounded-xl font-semibold transition-all shadow-lg hover:shadow-purple-500/30"
+                  >
+                    Start Learning Path
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </Link>
                 </div>
-
-                {/* Course Cards Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  
-                  {/* Card 1: Udemy (Paid/Comprehensive) */}
-                  <a 
-                    href={`https://www.udemy.com/courses/search/?q=${skill}`} 
-                    target="_blank" 
-                    rel="noreferrer"
-                    className="group bg-slate-900/50 border border-white/5 hover:border-purple-500/50 rounded-2xl p-5 transition-all hover:-translate-y-1 hover:shadow-lg hover:shadow-purple-500/10"
-                  >
-                    <div className="flex justify-between items-start mb-3">
-                      <div className="bg-purple-600/20 p-2 rounded-lg text-purple-400">
-                        <MonitorPlay className="w-5 h-5" />
-                      </div>
-                      <ExternalLink className="w-4 h-4 text-gray-600 group-hover:text-purple-400 transition" />
-                    </div>
-                    <h4 className="font-semibold text-white mb-1 group-hover:text-purple-300 transition">Master {skill} on Udemy</h4>
-                    <p className="text-xs text-gray-400">Comprehensive courses with certificates.</p>
-                  </a>
-
-                  {/* Card 2: Coursera (Academic) */}
-                  <a 
-                    href={`https://www.coursera.org/search?query=${skill}`} 
-                    target="_blank" 
-                    rel="noreferrer"
-                    className="group bg-slate-900/50 border border-white/5 hover:border-blue-500/50 rounded-2xl p-5 transition-all hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/10"
-                  >
-                    <div className="flex justify-between items-start mb-3">
-                      <div className="bg-blue-600/20 p-2 rounded-lg text-blue-400">
-                        <GraduationCap className="w-5 h-5" />
-                      </div>
-                      <ExternalLink className="w-4 h-4 text-gray-600 group-hover:text-blue-400 transition" />
-                    </div>
-                    <h4 className="font-semibold text-white mb-1 group-hover:text-blue-300 transition">{skill} Specializations</h4>
-                    <p className="text-xs text-gray-400">University-grade courses & certifications.</p>
-                  </a>
-
-                  {/* Card 3: YouTube (Free) */}
-                  <a 
-                    href={`https://www.youtube.com/results?search_query=learn+${skill}+tutorial`} 
-                    target="_blank" 
-                    rel="noreferrer"
-                    className="group bg-slate-900/50 border border-white/5 hover:border-red-500/50 rounded-2xl p-5 transition-all hover:-translate-y-1 hover:shadow-lg hover:shadow-red-500/10"
-                  >
-                    <div className="flex justify-between items-start mb-3">
-                      <div className="bg-red-600/20 p-2 rounded-lg text-red-400">
-                        <PlayCircle className="w-5 h-5" />
-                      </div>
-                      <ExternalLink className="w-4 h-4 text-gray-600 group-hover:text-red-400 transition" />
-                    </div>
-                    <h4 className="font-semibold text-white mb-1 group-hover:text-red-300 transition">Free {skill} Tutorials</h4>
-                    <p className="text-xs text-gray-400">Quick and free video guides on YouTube.</p>
-                  </a>
-
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </main>
