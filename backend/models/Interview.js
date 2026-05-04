@@ -43,7 +43,6 @@ const interviewSchema = new mongoose.Schema({
     default: ""
   },
 
-  // ✅ NEW: AI-generated unique intro prompt — different every time even for same interview type
   introPrompt: {
     type: String,
     default: ""
