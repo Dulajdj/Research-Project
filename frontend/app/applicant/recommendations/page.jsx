@@ -2,13 +2,15 @@
 
 import React, { Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import Link from 'next/link'; 
 import { 
-  BookOpen, ArrowLeft, GraduationCap, MonitorPlay, Sparkles, ChevronRight
+  BookOpen, ArrowLeft, GraduationCap, ArrowRight
 } from 'lucide-react';
 
+// Wrapper component to handle Suspense (Required for useSearchParams)
 export default function RecommendationsPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-slate-900 text-white flex items-center justify-center">Loading AI Recommendations...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-slate-900 text-white flex items-center justify-center">Loading...</div>}>
       <RecommendationsContent />
     </Suspense>
   );
@@ -18,16 +20,11 @@ function RecommendationsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
+  // Get skills from URL (e.g., ?skills=react,python)
   const skillsString = searchParams.get('skills');
-  const skills = skillsString ? skillsString.split(',') : [];
-  const yearsExp = searchParams.get('exp') || '0';
-
-  // --- UPDATED: INTERNAL NAVIGATION LOGIC ---
-  const handleViewInternalCourse = (skillName) => {
-    // Instead of external sites, we navigate to our internal courses page
-    // We pass the skill as a query so the Courses page can highlight or filter it
-    router.push(`/applicant/courses?highlight=${encodeURIComponent(skillName)}`);
-  };
+  
+  // FIX: Added .filter(Boolean) to ensure no empty boxes appear if there's a trailing comma
+  const skills = skillsString ? skillsString.split(',').filter(Boolean) : [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white font-sans">
@@ -47,70 +44,69 @@ function RecommendationsContent() {
               Learning Path Recommendation
             </h1>
           </div>
-          <button 
-            onClick={() => router.push('/applicant/courses')}
-            className="text-sm font-medium bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition"
-          >
-            Browse All Courses
-          </button>
         </div>
       </div>
 
       <main className="max-w-5xl mx-auto px-6 py-10">
         
-        <div className="mb-10 text-center space-y-4">
+        {/* Intro Banner */}
+        <div className="mb-10 text-center space-y-3">
           <h2 className="text-3xl md:text-4xl font-bold text-white">
             Upskill to <span className="text-purple-400">Get Hired</span>
           </h2>
-
-          <div className="inline-flex items-center gap-2 bg-purple-500/20 border border-purple-500/40 px-5 py-2 rounded-full shadow-lg shadow-purple-500/10">
-            <Sparkles className="w-4 h-4 text-purple-400" />
-            <span className="text-sm font-semibold text-purple-200">
-              AI Insight: {yearsExp} Years of Detected Experience
-            </span>
-          </div>
-
           <p className="text-gray-400 max-w-2xl mx-auto text-lg">
-            We found {skills.length} key skill gaps. Use our internal academy to bridge these gaps and qualify for more roles.
+            We identified the following gaps in your profile. Complete these guided learning paths to master the required skills.
           </p>
         </div>
 
+        {/* Skills Grid */}
         {skills.length === 0 ? (
           <div className="text-center py-20 bg-slate-800/50 rounded-3xl border border-white/5">
-            <p className="text-gray-400 font-medium text-lg">Your profile is a perfect match!</p>
-            <button onClick={() => router.push('/applicant/jobs')} className="mt-4 text-purple-400 hover:underline transition">
-              Explore more jobs
+            <p className="text-gray-400">No missing skills found in the request.</p>
+            <button onClick={() => router.push('/applicant/jobs')} className="mt-4 text-purple-400 hover:underline">
+              Go back to jobs
             </button>
           </div>
         ) : (
-          <div className="grid gap-8">
-            {skills.map((skill, index) => (
-              <div 
-                key={index} 
-                className="bg-slate-800/40 backdrop-blur-md border border-white/10 rounded-3xl p-6 md:p-8 shadow-xl transition hover:border-purple-500/30 group"
-              >
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                  <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-2xl bg-purple-600/20 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
-                      <MonitorPlay className="w-7 h-7" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {skills.map((skill) => {
+              // FIX: Creates a clean URL slug (e.g., "Machine Learning" becomes "machine-learning")
+              const skillSlug = skill.toLowerCase().trim().replace(/\s+/g, '-');
+
+              return (
+                // FIX: Used key={skill} instead of index for better React rendering performance
+                <div 
+                  key={skill} 
+                  className="bg-slate-800/40 backdrop-blur-md border border-white/10 hover:border-purple-500/50 rounded-3xl p-6 md:p-8 shadow-xl transition-all hover:-translate-y-1 hover:shadow-purple-500/20 flex flex-col h-full"
+                >
+                  {/* Skill Header */}
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-14 h-14 shrink-0 rounded-2xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30 flex items-center justify-center text-purple-300">
+                      <BookOpen className="w-7 h-7" />
                     </div>
                     <div>
                       <h3 className="text-2xl font-bold text-white capitalize">{skill}</h3>
-                      <p className="text-sm text-gray-400 max-w-md">
-                        We have prepared a custom internal roadmap to help you master {skill} and improve your technical score.
-                      </p>
+                      <span className="text-xs font-medium px-2 py-1 bg-slate-700/50 text-purple-300 rounded-md mt-1 inline-block">
+                        Required Skill
+                      </span>
                     </div>
                   </div>
 
-                  <button 
-                    onClick={() => handleViewInternalCourse(skill)}
-                    className="flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold py-4 px-8 rounded-2xl transition-all shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40"
+                  <p className="text-sm text-gray-400 mb-8 flex-grow">
+                    Step-by-step guided learning path to master {skill}. Includes curated resources from YouTube, Udemy, and Coursera with progress tracking.
+                  </p>
+
+                  {/* Link to the new dynamic Roadmap page */}
+                  <Link 
+                    href={`/applicant/courses/${skillSlug}`}
+                    className="group flex items-center justify-center gap-2 w-full bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-pink-500 text-white px-6 py-3 rounded-xl font-semibold transition-all shadow-lg hover:shadow-purple-500/30"
                   >
-                    View Internal Course <ChevronRight className="w-5 h-5" />
-                  </button>
+                    Start Learning Path
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </Link>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </main>
