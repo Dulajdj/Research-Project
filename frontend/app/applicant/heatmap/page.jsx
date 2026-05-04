@@ -26,8 +26,8 @@ export default function JobHeatmapPage() {
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        // Syncing with your backend running on Port 5001
-        const res = await fetch('http://localhost:5001/api/jobs');
+        // Syncing with your backend running on Port 5000
+        const res = await fetch('http://localhost:5000/api/jobs');
         const data = await res.json();
         if (data.success) {
           setJobs(data.data);
