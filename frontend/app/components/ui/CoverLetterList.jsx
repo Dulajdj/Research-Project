@@ -1,5 +1,5 @@
 // components/ui/CoverLetterList.jsx
-"use client"; // ← මේක එකතු කරන්න!
+"use client"; 
 
 import Link from "next/link";
 import { format } from "date-fns";

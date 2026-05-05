@@ -48,7 +48,7 @@ const certificationSchema = new mongoose.Schema({
   description: String,
 });
 
-// අලුතින් එකතු කරන ලද Reference Schema එක
+
 const referenceSchema = new mongoose.Schema({
   title: String,       // Name
   company: String,     // Position & Company
@@ -71,8 +71,6 @@ const resumeSchema = new mongoose.Schema({
   },
   summary: String,
   skills: String,
-  
-  // අලුතින් එකතු කරන ලද Technical Skills Field එක
   technicalSkills: String,
 
   experience: [experienceSchema],
@@ -80,7 +78,7 @@ const resumeSchema = new mongoose.Schema({
   projects: [projectSchema],
   certifications: [certificationSchema],
   
-  // අලුතින් එකතු කරන ලද References Array එක
+  
   references: [referenceSchema],
 
   selectedTemplate: { type: String, default: 'modern' },

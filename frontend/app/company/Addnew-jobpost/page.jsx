@@ -4,6 +4,15 @@ import React, { useState, useRef } from 'react';
 import CompanySidebar from '../../components/ui/CompanySidebar';
 import { Loader2, UploadCloud, FileText, X } from 'lucide-react';
 
+// --- NEW: Sri Lankan Districts / Cities Array ---
+const SRI_LANKAN_DISTRICTS = [
+  "Ampara", "Anuradhapura", "Badulla", "Batticaloa", "Colombo", "Dambulla", 
+  "Galle", "Gampaha", "Hambantota", "Jaffna", "Kalutara", "Kandy", "Kegalle", 
+  "Kilinochchi", "Kurunegala", "Mannar", "Matale", "Matara", "Monaragala", 
+  "Mullaitivu", "Negombo", "Nuwara Eliya", "Polonnaruwa", "Puttalam", 
+  "Ratnapura", "Trincomalee", "Vavuniya"
+];
+
 export default function AddNewJobPost() {
   // Using a single state object for cleaner form management
   const [formData, setFormData] = useState({
@@ -15,7 +24,7 @@ export default function AddNewJobPost() {
     requiredSkills: '',
     experienceLevel: '',
     employmentType: '',
-    workLocation: '', // e.g. Remote, Hybrid
+    workLocation: '', // Updated to store the District
     salaryRange: '',
     workingHours: '',
     closingDate: '',
@@ -72,9 +81,9 @@ export default function AddNewJobPost() {
 
     try {
       const res = await fetch('http://localhost:5000/api/jobs', {
-  method: 'POST',
-  body: dataToSend,
-});
+        method: 'POST',
+        body: dataToSend,
+      });
 
       if (res.ok) {
         alert('Job Posted Successfully!');
@@ -187,8 +196,9 @@ export default function AddNewJobPost() {
               </select>
             </div>
 
+            {/* --- UPDATED: Work Location now uses Districts --- */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-300">Work Location *</label>
+              <label className="text-sm font-medium text-gray-300">Work Location (District) *</label>
               <select
                 name="workLocation"
                 value={formData.workLocation}
@@ -196,10 +206,14 @@ export default function AddNewJobPost() {
                 required
                 className="w-full p-3 rounded-xl bg-slate-900/50 border border-white/10 focus:border-purple-500 outline-none text-gray-300"
               >
-                <option value="">Select Mode</option>
-                <option value="On-site">On-site</option>
-                <option value="Remote">Remote</option>
-                <option value="Hybrid">Hybrid</option>
+                <option value="">Select District</option>
+                <option value="Remote">Remote (Anywhere)</option>
+                {/* Dynamically rendering the districts array */}
+                {SRI_LANKAN_DISTRICTS.sort().map((district) => (
+                  <option key={district} value={district}>
+                    {district}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
